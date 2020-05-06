@@ -1,28 +1,26 @@
----
-title: "group13_winequality"
-output: html_document
----
+# Predicting the Quality of Wine
+## 1. Getting Data
+### Description of the dataset
+The dataset "winequalityN.csv" contains content information of different red and white wines in 12 columns. In the following, the individual attributes will be explained.
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+* type: categorial predictor with 2 levels white/red that describes whether the wine is a red or white wine.
+* fixed.acidity: continous predictor that describes the amount of acids that are solid and do not evaporate easily.
+* volatile.acidity: continous predictor that describes the amount of acids that can lead to a vinegar like taste.
+* citric.acid: continous predictor that describes the amount of acids that can add freshness and flavor to wines.
+* residual.sugar: continous predictor that describes the amount of sugar remaining after fermentation. Wines with greater than 45 grams/liter are considered sweet.
+* chlorides: continous predictor that describes the amount of salt in the wine.
+* free.sulfur.dioxide: continous predictor that describes the amount of the free form of sulphur dioxide (SO2). It prevents microbial growth and the oxidation of wine.
+* total.sulfur.dioxide: continous predictor that describes the amount of the free and the bound form of sulphur dioxide (S02). A concentration greater than 50 ppm becomes evident in nose and mouth.
+* density: continous predictor that describes the density of the water in the wine.
+* pH: continous predictor that describes how acidic or basic a wine is on a scale of 0 (very acidic) and 14 (very basic). Most wines have a pH value between 3 and 4.
+* sulphates: continous predictor that describes the amount of the wine additive which can contribute to sulfur dioxide gas (S02) levels.
+* alcohol: continous predictor that describes the percent alcohol content of the wine.
+* quality: categorical response variable with 10 levels between 0 and 10 that describes the wine quality.
+
+### Loading the data
+In a first step the dataset is loaded and stored in R:
+```{r}
+d.wine <- read.csv("winequalityN.csv", header=TRUE)
+head(d.wine)
+str(d.wine)
 ```
-
-## R Markdown
-
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
-```
-
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
