@@ -1,0 +1,316 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\hypersetup{
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+\urlstyle{same} % disable monospaced font for URLs
+\usepackage[margin=1in]{geometry}
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{graphicx,grffile}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+
+\author{}
+\date{\vspace{-2.5em}}
+
+\begin{document}
+
+\hypertarget{predicting-the-quality-of-wine}{%
+\section{Predicting the Quality of
+Wine}\label{predicting-the-quality-of-wine}}
+
+\hypertarget{getting-data}{%
+\subsection{1. Getting Data}\label{getting-data}}
+
+\hypertarget{data-source}{%
+\subsubsection{Data source}\label{data-source}}
+
+We downloaded the dataset ``winequalityN.csv'' from
+\url{https://www.kaggle.com/rajyellow46/wine-quality}.
+
+\hypertarget{loading-the-data}{%
+\subsubsection{Loading the data}\label{loading-the-data}}
+
+In a first step the dataset is imported to R and stored in a data.frame:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{d.wine <-}\StringTok{ }\KeywordTok{read.csv}\NormalTok{(}\StringTok{"winequalityN.csv"}\NormalTok{, }\DataTypeTok{header=}\OtherTok{TRUE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{describing-the-dataset}{%
+\subsubsection{Describing the dataset}\label{describing-the-dataset}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{str}\NormalTok{(d.wine)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 'data.frame':    6497 obs. of  13 variables:
+##  $ type                : Factor w/ 2 levels "red","white": 2 2 2 2 2 2 2 2 2 2 ...
+##  $ fixed.acidity       : num  7 6.3 8.1 7.2 7.2 8.1 6.2 7 6.3 8.1 ...
+##  $ volatile.acidity    : num  0.27 0.3 0.28 0.23 0.23 0.28 0.32 0.27 0.3 0.22 ...
+##  $ citric.acid         : num  0.36 0.34 0.4 0.32 0.32 0.4 0.16 0.36 0.34 0.43 ...
+##  $ residual.sugar      : num  20.7 1.6 6.9 8.5 8.5 6.9 7 20.7 1.6 1.5 ...
+##  $ chlorides           : num  0.045 0.049 0.05 0.058 0.058 0.05 0.045 0.045 0.049 0.044 ...
+##  $ free.sulfur.dioxide : num  45 14 30 47 47 30 30 45 14 28 ...
+##  $ total.sulfur.dioxide: num  170 132 97 186 186 97 136 170 132 129 ...
+##  $ density             : num  1.001 0.994 0.995 0.996 0.996 ...
+##  $ pH                  : num  3 3.3 3.26 3.19 3.19 3.26 3.18 3 3.3 3.22 ...
+##  $ sulphates           : num  0.45 0.49 0.44 0.4 0.4 0.44 0.47 0.45 0.49 0.45 ...
+##  $ alcohol             : num  8.8 9.5 10.1 9.9 9.9 10.1 9.6 8.8 9.5 11 ...
+##  $ quality             : int  6 6 6 6 6 6 6 6 6 6 ...
+\end{verbatim}
+
+The dataset contains content information of different red and white
+wines in 6497 observations of 13 columns. In the following, the
+individual attributes will be explained:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{type}: categorial predictor with 2 levels white/red that
+  describes whether the wine is a red or white wine.
+\item
+  \textbf{fixed.acidity}: continous predictor that describes the amount
+  of acids that are solid and do not evaporate easily.
+\item
+  \textbf{volatile.acidity}: continous predictor that describes the
+  amount of acids that can lead to a vinegar like taste.
+\item
+  \textbf{citric.acid}: continous predictor that describes the amount of
+  acids that can add freshness and flavor to wines.
+\item
+  \textbf{residual.sugar}: continous predictor that describes the amount
+  of sugar remaining after fermentation. Wines with greater than 45
+  grams/liter are considered sweet.
+\item
+  \textbf{chlorides}: continous predictor that describes the amount of
+  salt in the wine.
+\item
+  \textbf{free.sulfur}.dioxide: continous predictor that describes the
+  amount of the free form of sulphur dioxide (SO2). It prevents
+  microbial growth and the oxidation of wine.
+\item
+  \textbf{total.sulfur.dioxide}: continous predictor that describes the
+  amount of the free and the bound form of sulphur dioxide (S02). A
+  concentration greater than 50 ppm becomes evident in nose and mouth.
+\item
+  \textbf{density}: continous predictor that describes the density of
+  the water in the wine.
+\item
+  \textbf{pH}: continous predictor that describes how acidic or basic a
+  wine is on a scale of 0 (very acidic) and 14 (very basic). Most wines
+  have a pH value between 3 and 4.
+\item
+  \textbf{sulphates}: continous predictor that describes the amount of
+  the wine additive which can contribute to sulfur dioxide gas (S02)
+  levels.
+\item
+  \textbf{alcohol}: continous predictor that describes the percent
+  alcohol content of the wine.
+\item
+  \textbf{quality}: categorical response variable with 10 levels between
+  0 and 10 that describes the wine quality.
+\end{itemize}
+
+\hypertarget{checking-the-data}{%
+\subsubsection{Checking the data}\label{checking-the-data}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{head}\NormalTok{(d.wine)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##    type fixed.acidity volatile.acidity citric.acid residual.sugar chlorides
+## 1 white           7.0             0.27        0.36           20.7     0.045
+## 2 white           6.3             0.30        0.34            1.6     0.049
+## 3 white           8.1             0.28        0.40            6.9     0.050
+## 4 white           7.2             0.23        0.32            8.5     0.058
+## 5 white           7.2             0.23        0.32            8.5     0.058
+## 6 white           8.1             0.28        0.40            6.9     0.050
+##   free.sulfur.dioxide total.sulfur.dioxide density   pH sulphates alcohol
+## 1                  45                  170  1.0010 3.00      0.45     8.8
+## 2                  14                  132  0.9940 3.30      0.49     9.5
+## 3                  30                   97  0.9951 3.26      0.44    10.1
+## 4                  47                  186  0.9956 3.19      0.40     9.9
+## 5                  47                  186  0.9956 3.19      0.40     9.9
+## 6                  30                   97  0.9951 3.26      0.44    10.1
+##   quality
+## 1       6
+## 2       6
+## 3       6
+## 4       6
+## 5       6
+## 6       6
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{tail}\NormalTok{(d.wine)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##      type fixed.acidity volatile.acidity citric.acid residual.sugar chlorides
+## 6492  red           6.8            0.620        0.08            1.9     0.068
+## 6493  red           6.2            0.600        0.08            2.0     0.090
+## 6494  red           5.9            0.550        0.10            2.2     0.062
+## 6495  red           6.3            0.510        0.13            2.3     0.076
+## 6496  red           5.9            0.645        0.12            2.0     0.075
+## 6497  red           6.0            0.310        0.47            3.6     0.067
+##      free.sulfur.dioxide total.sulfur.dioxide density   pH sulphates alcohol
+## 6492                  28                   38 0.99651 3.42      0.82     9.5
+## 6493                  32                   44 0.99490 3.45      0.58    10.5
+## 6494                  39                   51 0.99512 3.52        NA    11.2
+## 6495                  29                   40 0.99574 3.42      0.75    11.0
+## 6496                  32                   44 0.99547 3.57      0.71    10.2
+## 6497                  18                   42 0.99549 3.39      0.66    11.0
+##      quality
+## 6492       6
+## 6493       5
+## 6494       6
+## 6495       6
+## 6496       5
+## 6497       6
+\end{verbatim}
+
+As it looks like the data set was imported completely. In row No 6494
+there is an missing value (not avaiable, NA) in the sulphates column.
+Probably this is not the only one. Therefore we count the number of NAs
+in the data set.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{sum}\NormalTok{(}\KeywordTok{is.na}\NormalTok{(d.wine))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 38
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{mean}\NormalTok{(}\KeywordTok{is.na}\NormalTok{(d.wine))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.0004499118
+\end{verbatim}
+
+The complete data set contains 38 NA. These make up about 0.04\% of the
+data set. We decide to delete the incomplete rows.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{d.wine <-}\StringTok{ }\KeywordTok{na.omit}\NormalTok{(d.wine)}
+\KeywordTok{sum}\NormalTok{(}\KeywordTok{is.na}\NormalTok{(d.wine))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0
+\end{verbatim}
+
+The data set now contains only complete observations. Now we are ready
+for the further analysis steps.
+
+\hypertarget{graphical-analysis}{%
+\subsection{2. Graphical Analysis}\label{graphical-analysis}}
+
+\end{document}

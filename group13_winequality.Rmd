@@ -1,10 +1,15 @@
+---
+output:
+  html_document: default
+  pdf_document: default
+---
 # Predicting the Quality of Wine
 ## 1. Getting Data
 ### Data source
 We downloaded the dataset "winequalityN.csv" from https://www.kaggle.com/rajyellow46/wine-quality.
 
 ### Loading the data
-In a first step the dataset is imported to R and stored in a data.frame:
+In a first step the dataset is imported to R and stored in the data.frame *d.wine*:
 ```{r}
 d.wine <- read.csv("winequalityN.csv", header=TRUE)
 ```
@@ -35,7 +40,7 @@ The dataset contains content information of different red and white wines in 649
 head(d.wine)
 tail(d.wine)
 ```
-As it looks like the data set was imported completely. In row No 6494 there is an missing value (not avaiable, NA) in the sulphates column. Probably this is not the only one. Therefore we count the number of NAs in the data set.
+As it looks like the data set was imported completely. In row No 6494 there is an missing value (not avaiable, NA) in the **sulphates** column. Probably this is not the only one. Therefore we count the number of NAs in the data set.
 ```{r}
 sum(is.na(d.wine))
 mean(is.na(d.wine))

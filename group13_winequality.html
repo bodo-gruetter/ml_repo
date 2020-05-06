@@ -375,7 +375,7 @@ summary {
 </div>
 <div id="loading-the-data" class="section level3">
 <h3>Loading the data</h3>
-<p>In a first step the dataset is imported to R and stored in a data.frame:</p>
+<p>In a first step the dataset is imported to R and stored in the data.frame <em>d.wine</em>:</p>
 <pre class="r"><code>d.wine &lt;- read.csv(&quot;winequalityN.csv&quot;, header=TRUE)</code></pre>
 </div>
 <div id="describing-the-dataset" class="section level3">
@@ -458,7 +458,7 @@ summary {
 ## 6495       6
 ## 6496       5
 ## 6497       6</code></pre>
-<p>As it looks like the data set was imported completely. In row No 6494 there is an missing value (not avaiable, NA) in the sulphates column. Probably this is not the only one. Therefore we count the number of NAs in the data set.</p>
+<p>As it looks like the data set was imported completely. In row No 6494 there is an missing value (not avaiable, NA) in the <strong>sulphates</strong> column. Probably this is not the only one. Therefore we count the number of NAs in the data set.</p>
 <pre class="r"><code>sum(is.na(d.wine))</code></pre>
 <pre><code>## [1] 38</code></pre>
 <pre class="r"><code>mean(is.na(d.wine))</code></pre>
