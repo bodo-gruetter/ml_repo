@@ -399,8 +399,8 @@ summary {
 <li><em>datetime</em>: hourly date + timestamp<br />
 </li>
 <li><em>season</em>: 1 = spring, 2 = summer, 3 = fall, 4 = winter</li>
-<li><em>holiday</em>: whether the day is considered a holiday</li>
-<li><em>workingday</em>: whether the day is neither a weekend nor holiday</li>
+<li><em>holiday</em>: 0 = no holiday, 1 = holiday</li>
+<li><em>workingday</em>: 0 = weekend or holiday, 1 = working day</li>
 <li><em>weather</em>:
 <ul>
 <li>1: Clear, Few clouds, Partly cloudy, Partly cloudy</li>
@@ -454,7 +454,11 @@ summary {
 <pre><code>## [1] 0</code></pre>
 <pre class="r"><code>mean(is.na(d.bike))</code></pre>
 <pre><code>## [1] 0</code></pre>
+<p>The record contains no rows with missing data. Now we are ready for the further analysis steps.</p>
 </div>
+</div>
+<div id="graphical-analysis" class="section level2">
+<h2>2. Graphical Analysis</h2>
 </div>
 </div>
 
