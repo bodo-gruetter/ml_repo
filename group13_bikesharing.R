@@ -57,7 +57,7 @@ qplot(y = cnt, x = temp, data = d.bike, facets = ~ weekday)
 
 qplot(y = cnt, x = temp, data = d.bike, facets = ~ workingday)
 
-qplot(y = cnt, x = temp, data = d.bike, facets = ~ weather)
+qplot(y = cnt, x = temp, data = d.bike, facets = ~ weathersit)
 
 ## Investigating the felt temperature
 ggplot(data = d.bike, mapping = aes(y = cnt, x = atemp)) +
