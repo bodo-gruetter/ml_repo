@@ -15,7 +15,7 @@ d.bike <- read.csv("bikesharing.csv", header=TRUE)
 str(d.bike)
 ```
 
-The dataset contains content information of different red and white wines in 17 observations of 12 variables. In the following, the individual attributes will be explained:
+The dataset contains hourly information about a day and its weather conditions in 17379 observations of 17 variables. In the following, the individual attributes will be explained:
 
 * *instant*: record index
 * *dteday*: Date
