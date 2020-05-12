@@ -54,3 +54,14 @@ sum(is.na(d.wine))
 The data set now contains only complete observations. Now we are ready for the further analysis steps.
 
 ## 2. Graphical Analysis
+
+## 3. Modelling
+### Linear Regression
+
+### Non-Linear Regression
+
+### Poisson Regression
+
+### Logistic Regression
+
+### Comparing the Models

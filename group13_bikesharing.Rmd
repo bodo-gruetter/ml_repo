@@ -1,1 +1,48 @@
 # Predicting the Number of Bike Shares
+## 1. Getting Data
+### Data source
+We downloaded the dataset "bikesharing.csv" from https://www.kaggle.com/c/bike-sharing-demand/data.
+
+### Loading the data
+In a first step the dataset is imported to R and stored in the data.frame *d.bike*:
+```{r}
+d.bike <- read.csv("bikesharing.csv", header=TRUE)
+```
+
+### Describing the dataset
+```{r}
+str(d.bike)
+```
+
+The dataset contains content information of different red and white wines in 10886 observations of 12 variables. In the following, the individual attributes will be explained:
+
+* *datetime*: hourly date + timestamp  
+* *season*: 1 = spring, 2 = summer, 3 = fall, 4 = winter 
+* *holiday*: whether the day is considered a holiday
+* *workingday*: whether the day is neither a weekend nor holiday
+* *weather*:
+  + 1: Clear, Few clouds, Partly cloudy, Partly cloudy
+  + 2: Mist + Cloudy, Mist + Broken clouds, Mist + Few clouds, Mist
+  + 3: Light Snow, Light Rain + Thunderstorm + Scattered clouds, Light Rain + Scattered clouds
+  + 4: Heavy Rain + Ice Pallets + Thunderstorm + Mist, Snow + Fog 
+* *temp*: temperature in Celsius
+* *atemp*: "feels like" temperature in Celsius
+* *humidity*: relative humidity
+* *windspeed*: wind speed
+* *casual*: number of non-registered user rentals initiated
+* *registered*: number of registered user rentals initiated
+* *count*: number of total rentals
+
+### Checking the data
+```{r}
+head(d.bike)
+tail(d.bike)
+```
+As it looks like the data set was imported completely. To check if there are any missing values (not available, NA) in this dataset we count the number of NAs in the data set.
+```{r}
+sum(is.na(d.bike))
+mean(is.na(d.bike))
+```
+The record contains no rows with missing data. Now we are ready for the further analysis steps.
+
+## 2. Graphical Analysis
