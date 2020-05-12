@@ -18,8 +18,8 @@ The dataset contains content information of different red and white wines in 108
 
 * *datetime*: hourly date + timestamp  
 * *season*: 1 = spring, 2 = summer, 3 = fall, 4 = winter 
-* *holiday*: whether the day is considered a holiday
-* *workingday*: whether the day is neither a weekend nor holiday
+* *holiday*: 0 = no holiday, 1 = holiday
+* *workingday*: 0 = weekend or holiday, 1 = working day
 * *weather*:
   + 1: Clear, Few clouds, Partly cloudy, Partly cloudy
   + 2: Mist + Cloudy, Mist + Broken clouds, Mist + Few clouds, Mist
