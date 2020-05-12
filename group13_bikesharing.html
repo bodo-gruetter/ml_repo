@@ -367,12 +367,7 @@ summary {
 
 <div id="predicting-the-number-of-bike-shares" class="section level1">
 <h1>Predicting the Number of Bike Shares</h1>
-<div id="getting-data" class="section level2">
-<h2>1. Getting Data</h2>
-<div id="data-source" class="section level3">
-<h3>Data source</h3>
-<p>We downloaded the dataset “bikesharing.csv” from <a href="https://www.kaggle.com/c/bike-sharing-demand/data" class="uri">https://www.kaggle.com/c/bike-sharing-demand/data</a>.</p>
-</div>
+<p>In this analysis we would like to predict the count of bike rentals in Washington DC. ## 1. Getting Data ### Data source We downloaded the dataset “bikesharing.csv” from <a href="https://code.datasciencedojo.com/datasciencedojo/datasets/tree/master/Bike%20Sharing" class="uri">https://code.datasciencedojo.com/datasciencedojo/datasets/tree/master/Bike%20Sharing</a>.</p>
 <div id="loading-the-data" class="section level3">
 <h3>Loading the data</h3>
 <p>In a first step the dataset is imported to R and stored in the data.frame <em>d.bike</em>:</p>
@@ -381,81 +376,89 @@ summary {
 <div id="describing-the-dataset" class="section level3">
 <h3>Describing the dataset</h3>
 <pre class="r"><code>str(d.bike)</code></pre>
-<pre><code>## &#39;data.frame&#39;:    10886 obs. of  12 variables:
-##  $ datetime  : Factor w/ 10886 levels &quot;2011-01-01 00:00:00&quot;,..: 1 2 3 4 5 6 7 8 9 10 ...
+<pre><code>## &#39;data.frame&#39;:    17379 obs. of  17 variables:
+##  $ instant   : int  1 2 3 4 5 6 7 8 9 10 ...
+##  $ dteday    : Factor w/ 731 levels &quot;2011-01-01&quot;,&quot;2011-01-02&quot;,..: 1 1 1 1 1 1 1 1 1 1 ...
 ##  $ season    : int  1 1 1 1 1 1 1 1 1 1 ...
+##  $ yr        : int  0 0 0 0 0 0 0 0 0 0 ...
+##  $ mnth      : int  1 1 1 1 1 1 1 1 1 1 ...
+##  $ hr        : int  0 1 2 3 4 5 6 7 8 9 ...
 ##  $ holiday   : int  0 0 0 0 0 0 0 0 0 0 ...
+##  $ weekday   : int  6 6 6 6 6 6 6 6 6 6 ...
 ##  $ workingday: int  0 0 0 0 0 0 0 0 0 0 ...
-##  $ weather   : int  1 1 1 1 1 2 1 1 1 1 ...
-##  $ temp      : num  9.84 9.02 9.02 9.84 9.84 ...
-##  $ atemp     : num  14.4 13.6 13.6 14.4 14.4 ...
-##  $ humidity  : int  81 80 80 75 75 75 80 86 75 76 ...
-##  $ windspeed : num  0 0 0 0 0 ...
+##  $ weathersit: int  1 1 1 1 1 2 1 1 1 1 ...
+##  $ temp      : num  0.24 0.22 0.22 0.24 0.24 0.24 0.22 0.2 0.24 0.32 ...
+##  $ atemp     : num  0.288 0.273 0.273 0.288 0.288 ...
+##  $ hum       : num  0.81 0.8 0.8 0.75 0.75 0.75 0.8 0.86 0.75 0.76 ...
+##  $ windspeed : num  0 0 0 0 0 0.0896 0 0 0 0 ...
 ##  $ casual    : int  3 8 5 3 0 0 2 1 1 8 ...
 ##  $ registered: int  13 32 27 10 1 1 0 2 7 6 ...
-##  $ count     : int  16 40 32 13 1 1 2 3 8 14 ...</code></pre>
+##  $ cnt       : int  16 40 32 13 1 1 2 3 8 14 ...</code></pre>
 <p>The dataset contains content information of different red and white wines in 10886 observations of 12 variables. In the following, the individual attributes will be explained:</p>
 <ul>
-<li><em>datetime</em>: hourly date + timestamp<br />
-</li>
+<li><em>instant</em>: record index</li>
+<li><em>dteday</em>: Date</li>
 <li><em>season</em>: 1 = spring, 2 = summer, 3 = fall, 4 = winter</li>
+<li><em>yr</em>: Year; 0: 2011, 1: 2012</li>
+<li><em>mnth</em>: Month; 1 to 12</li>
+<li><em>hr</em>: Hour; 0 to 23</li>
 <li><em>holiday</em>: 0 = no holiday, 1 = holiday</li>
+<li><em>weekday</em>: Day of the week; 1 to 7</li>
 <li><em>workingday</em>: 0 = weekend or holiday, 1 = working day</li>
-<li><em>weather</em>:
+<li><em>weathersit</em>:
 <ul>
 <li>1: Clear, Few clouds, Partly cloudy, Partly cloudy</li>
 <li>2: Mist + Cloudy, Mist + Broken clouds, Mist + Few clouds, Mist</li>
 <li>3: Light Snow, Light Rain + Thunderstorm + Scattered clouds, Light Rain + Scattered clouds</li>
 <li>4: Heavy Rain + Ice Pallets + Thunderstorm + Mist, Snow + Fog</li>
 </ul></li>
-<li><em>temp</em>: temperature in Celsius</li>
-<li><em>atemp</em>: “feels like” temperature in Celsius</li>
-<li><em>humidity</em>: relative humidity</li>
-<li><em>windspeed</em>: wind speed</li>
-<li><em>casual</em>: number of non-registered user rentals initiated</li>
-<li><em>registered</em>: number of registered user rentals initiated</li>
-<li><em>count</em>: number of total rentals</li>
+<li><em>temp</em>: Normalized temperature in Celsius; The values are derived via (t-t_min)/(t_max-t_min), t_min=-8, t_max=+39;</li>
+<li><em>atemp</em>: Normalized feeling temperature in Celsius; Normalized feeling temperature in Celsius. The values are derived via (t-t_min)/(t_max-t_min), t_min=-16, t_max=+50</li>
+<li><em>hum</em>: Normalized relative humidity; The values are divided to 100 (max);</li>
+<li><em>windspeed</em>: Normalized windspeed ; The values are divided to 67 (max)</li>
+<li><em>casual</em>: number of non-registered (eg. tourists)</li>
+<li><em>registered</em>: number of registered users (eg. workers that use bikes daily)</li>
+<li><em>cnt</em>: number of total rentals</li>
 </ul>
 </div>
 <div id="checking-the-data" class="section level3">
 <h3>Checking the data</h3>
 <pre class="r"><code>head(d.bike)</code></pre>
-<pre><code>##              datetime season holiday workingday weather temp  atemp humidity
-## 1 2011-01-01 00:00:00      1       0          0       1 9.84 14.395       81
-## 2 2011-01-01 01:00:00      1       0          0       1 9.02 13.635       80
-## 3 2011-01-01 02:00:00      1       0          0       1 9.02 13.635       80
-## 4 2011-01-01 03:00:00      1       0          0       1 9.84 14.395       75
-## 5 2011-01-01 04:00:00      1       0          0       1 9.84 14.395       75
-## 6 2011-01-01 05:00:00      1       0          0       2 9.84 12.880       75
-##   windspeed casual registered count
-## 1    0.0000      3         13    16
-## 2    0.0000      8         32    40
-## 3    0.0000      5         27    32
-## 4    0.0000      3         10    13
-## 5    0.0000      0          1     1
-## 6    6.0032      0          1     1</code></pre>
+<pre><code>##   instant     dteday season yr mnth hr holiday weekday workingday weathersit
+## 1       1 2011-01-01      1  0    1  0       0       6          0          1
+## 2       2 2011-01-01      1  0    1  1       0       6          0          1
+## 3       3 2011-01-01      1  0    1  2       0       6          0          1
+## 4       4 2011-01-01      1  0    1  3       0       6          0          1
+## 5       5 2011-01-01      1  0    1  4       0       6          0          1
+## 6       6 2011-01-01      1  0    1  5       0       6          0          2
+##   temp  atemp  hum windspeed casual registered cnt
+## 1 0.24 0.2879 0.81    0.0000      3         13  16
+## 2 0.22 0.2727 0.80    0.0000      8         32  40
+## 3 0.22 0.2727 0.80    0.0000      5         27  32
+## 4 0.24 0.2879 0.75    0.0000      3         10  13
+## 5 0.24 0.2879 0.75    0.0000      0          1   1
+## 6 0.24 0.2576 0.75    0.0896      0          1   1</code></pre>
 <pre class="r"><code>tail(d.bike)</code></pre>
-<pre><code>##                  datetime season holiday workingday weather  temp  atemp
-## 10881 2012-12-19 18:00:00      4       0          1       1 15.58 19.695
-## 10882 2012-12-19 19:00:00      4       0          1       1 15.58 19.695
-## 10883 2012-12-19 20:00:00      4       0          1       1 14.76 17.425
-## 10884 2012-12-19 21:00:00      4       0          1       1 13.94 15.910
-## 10885 2012-12-19 22:00:00      4       0          1       1 13.94 17.425
-## 10886 2012-12-19 23:00:00      4       0          1       1 13.12 16.665
-##       humidity windspeed casual registered count
-## 10881       50   23.9994     23        546   569
-## 10882       50   26.0027      7        329   336
-## 10883       57   15.0013     10        231   241
-## 10884       61   15.0013      4        164   168
-## 10885       61    6.0032     12        117   129
-## 10886       66    8.9981      4         84    88</code></pre>
+<pre><code>##       instant     dteday season yr mnth hr holiday weekday workingday
+## 17374   17374 2012-12-31      1  1   12 18       0       1          1
+## 17375   17375 2012-12-31      1  1   12 19       0       1          1
+## 17376   17376 2012-12-31      1  1   12 20       0       1          1
+## 17377   17377 2012-12-31      1  1   12 21       0       1          1
+## 17378   17378 2012-12-31      1  1   12 22       0       1          1
+## 17379   17379 2012-12-31      1  1   12 23       0       1          1
+##       weathersit temp  atemp  hum windspeed casual registered cnt
+## 17374          2 0.26 0.2727 0.48    0.1343     10        112 122
+## 17375          2 0.26 0.2576 0.60    0.1642     11        108 119
+## 17376          2 0.26 0.2576 0.60    0.1642      8         81  89
+## 17377          1 0.26 0.2576 0.60    0.1642      7         83  90
+## 17378          1 0.26 0.2727 0.56    0.1343     13         48  61
+## 17379          1 0.26 0.2727 0.65    0.1343     12         37  49</code></pre>
 <p>As it looks like the data set was imported completely. To check if there are any missing values (not available, NA) in this dataset we count the number of NAs in the data set.</p>
 <pre class="r"><code>sum(is.na(d.bike))</code></pre>
 <pre><code>## [1] 0</code></pre>
 <pre class="r"><code>mean(is.na(d.bike))</code></pre>
 <pre><code>## [1] 0</code></pre>
 <p>The record contains no rows with missing data. Now we are ready for the further analysis steps.</p>
-</div>
 </div>
 <div id="graphical-analysis" class="section level2">
 <h2>2. Graphical Analysis</h2>

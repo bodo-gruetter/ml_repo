@@ -8,89 +8,73 @@ sum(is.na(d.bike))
 mean(is.na(d.bike))
 
 ## Investigating the season
-ggplot(data = d.bike, aes(group=season, y = count, x = season)) +
+ggplot(data = d.bike, aes(group=season, y = cnt, x = season)) +
+  geom_boxplot()
+
+## Investigating the year
+ggplot(data = d.bike, aes(group=yr, y = cnt, x = yr)) +
+  geom_boxplot()
+
+## Investigating the month
+ggplot(data = d.bike, aes(group=mnth, y = cnt, x = mnth)) +
+  geom_boxplot()
+
+## Investigating the hour
+ggplot(data = d.bike, aes(group=hr, y = cnt, x = hr)) +
   geom_boxplot()
 
 ## Investigating the holiday
-ggplot(data = d.bike, aes(group=holiday, y = count, x = holiday)) +
+ggplot(data = d.bike, aes(group=holiday, y = cnt, x = holiday)) +
+  geom_boxplot()
+
+## Investigating the weekday
+ggplot(data = d.bike, aes(group=weekday, y= cnt, x = weekday)) +
   geom_boxplot()
 
 ## Investigating the workingday
-ggplot(data = d.bike, aes(group=workingday, y = count, x = workingday)) +
+ggplot(data = d.bike, aes(group=workingday, y = cnt, x = workingday)) +
   geom_boxplot()
 
-## Investigating the workingday
-ggplot(data = d.bike, aes(group=weather, y = count, x = weather)) +
+## Investigating the weather situation
+ggplot(data = d.bike, aes(group=weathersit, y = cnt, x = weathersit)) +
   geom_boxplot()
 
 ## Investigating the temperature
-ggplot(data = d.bike, mapping = aes(y = count, x = temp)) +
+ggplot(data = d.bike, mapping = aes(y = cnt, x = temp)) +
   geom_point()
 
-qplot(y = count, x = temp, data = d.bike, facets = ~ season)
+qplot(y = cnt, x = temp, data = d.bike, facets = ~ season)
 
-qplot(y = count, x = temp, data = d.bike, facets = ~ holiday)
+qplot(y = cnt, x = temp, data = d.bike, facets = ~ yr)
 
-qplot(y = count, x = temp, data = d.bike, facets = ~ workingday)
+qplot(y = cnt, x = temp, data = d.bike, facets = ~ mnth)
 
-qplot(y = count, x = temp, data = d.bike, facets = ~ weather)
+qplot(y = cnt, x = temp, data = d.bike, facets = ~ hr)
+
+qplot(y = cnt, x = temp, data = d.bike, facets = ~ holiday)
+
+qplot(y = cnt, x = temp, data = d.bike, facets = ~ weekday)
+
+qplot(y = cnt, x = temp, data = d.bike, facets = ~ workingday)
+
+qplot(y = cnt, x = temp, data = d.bike, facets = ~ weather)
 
 ## Investigating the felt temperature
-ggplot(data = d.bike, mapping = aes(y = count, x = atemp)) +
+ggplot(data = d.bike, mapping = aes(y = cnt, x = atemp)) +
   geom_point()
-
-qplot(y = count, x = atemp, data = d.bike, facets = ~ season)
-
-qplot(y = count, x = atemp, data = d.bike, facets = ~ holiday)
-
-qplot(y = count, x = atemp, data = d.bike, facets = ~ workingday)
-
-qplot(y = count, x = atemp, data = d.bike, facets = ~ weather)
 
 ## Investigating the humidity
-ggplot(data = d.bike, mapping = aes(y = count, x = humidity)) +
+ggplot(data = d.bike, mapping = aes(y = cnt, x = hum)) +
   geom_point()
-
-qplot(y = count, x = humidity, data = d.bike, facets = ~ season)
-
-qplot(y = count, x = humidity, data = d.bike, facets = ~ holiday)
-
-qplot(y = count, x = humidity, data = d.bike, facets = ~ workingday)
-
-qplot(y = count, x = humidity, data = d.bike, facets = ~ weather)
 
 ## Investigating the windspeed
-ggplot(data = d.bike, mapping = aes(y = count, x = windspeed)) +
+ggplot(data = d.bike, mapping = aes(y = cnt, x = windspeed)) +
   geom_point()
-
-qplot(y = count, x = windspeed, data = d.bike, facets = ~ season)
-
-qplot(y = count, x = windspeed, data = d.bike, facets = ~ holiday)
-
-qplot(y = count, x = windspeed, data = d.bike, facets = ~ workingday)
-
-qplot(y = count, x = windspeed, data = d.bike, facets = ~ weather)
 
 ## Investigating the casual users
-ggplot(data = d.bike, mapping = aes(y = count, x = casual)) +
+ggplot(data = d.bike, mapping = aes(y = cnt, x = casual)) +
   geom_point()
-
-qplot(y = count, x = casual, data = d.bike, facets = ~ season)
-
-qplot(y = count, x = casual, data = d.bike, facets = ~ holiday)
-
-qplot(y = count, x = casual, data = d.bike, facets = ~ workingday)
-
-qplot(y = count, x = casual, data = d.bike, facets = ~ weather)
 
 ## Investigating the registered users
-ggplot(data = d.bike, mapping = aes(y = count, x = registered)) +
+ggplot(data = d.bike, mapping = aes(y = cnt, x = registered)) +
   geom_point()
-
-qplot(y = count, x = registered, data = d.bike, facets = ~ season)
-
-qplot(y = count, x = registered, data = d.bike, facets = ~ holiday)
-
-qplot(y = count, x = registered, data = d.bike, facets = ~ workingday)
-
-qplot(y = count, x = registered, data = d.bike, facets = ~ weather)
