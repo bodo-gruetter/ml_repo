@@ -17,11 +17,15 @@ ggplot(data = d.bike, aes(group=yr, y = cnt, x = yr)) +
 
 ## Investigating the month
 ggplot(data = d.bike, aes(group=mnth, y = cnt, x = mnth)) +
-  geom_boxplot()
+  geom_boxplot() + scale_x_discrete(limits=seq(1,12))
 
 ## Investigating the hour
 ggplot(data = d.bike, aes(group=hr, y = cnt, x = hr)) +
-  geom_boxplot()
+  geom_boxplot() + scale_x_discrete(limits=seq(0,23))
+
+## Investigating the hour
+ggplot(data = d.bike, aes(group=hr, y = cnt, x = hr)) +
+  geom_point() + scale_x_discrete(limits=seq(0,23))
 
 ## Investigating the holiday
 ggplot(data = d.bike, aes(group=holiday, y = cnt, x = holiday)) +
