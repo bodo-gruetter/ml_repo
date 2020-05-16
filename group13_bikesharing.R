@@ -8,7 +8,7 @@ sum(is.na(d.bike))
 mean(is.na(d.bike))
 
 ## Investigating the season
-ggplot(data = d.bike, aes(group=season, y = cnt, x = season)) +
+ggplot(data = d.bike, aes(group=season, y = cnt, x = as.factor(season))) +
   geom_boxplot()
 
 ## Investigating the year
