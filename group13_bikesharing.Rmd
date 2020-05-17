@@ -55,17 +55,31 @@ mean(is.na(d.bike))
 The record contains no rows with missing data. Now we are ready for the further analysis steps.
 
 ## 2. Explorative Data Analysis
-### Testing the Season
-Because ggplot allows elegant data visualization with the same syntax for different types of data models, we decide to use ggplot exclusively for graphical representations as far as possible. Therefore we import ggplot2. If we want to visualize the effect of the *season* on the number of bike rentals it is a good idea to use a box plot.
+Because ggplot allows elegant data visualization with the same syntax for different types of data models, we decide to use ggplot exclusively for graphical representations as far as possible. Therefore we import ggplot2.
 ```{r}
 library(ggplot2)
+```
+
+### Count
+In the very first step we would like to look at the distribution of count. For this purpose we create a histogram.
+```{r}
+ggplot(data = d.bike, aes(x=cnt)) +
+  geom_histogram(bins=30, colour="black", ylab="Frequency") + xlab("Count") + ylab("Frequency")
+mean(d.bike$cnt)
+sd(d.bike$cnt)
+```
+As we can see, this is a right skewed distribution. So in most hours - the number of bike rentals are hourly observations - between 0 and 30 bikes (the most left bar) are rented.
+
+### Season
+If we want to visualize the effect of the *season* on the number of bike rentals it is a good idea to use a box plot.
+```{r}
 ggplot(data = d.bike, aes(group=season, y = cnt, x = as.factor(season))) +
   geom_boxplot()
 ```
 
 As the box plot shows, season 1 (spring) is particularly different from season 2, 3 and 4 (summer, autumn and winter). The median is lowest in spring, even lower than in winter. In summer, autumn and winter, the medians differ only marginally.  Since the medians differ partially, one can assume a slight effect. However, we want to examine this more closely.
 
-First we check whether the four seasons differ significantly from each other. For this we apply a simple linear regression model.
+First we check whether the four seasons differ significantly from season 1. For this we apply a simple linear regression model.
 ```{r}
 lm.season.1 <- lm(cnt ~ as.factor(season), data = d.bike)
 summary(lm.season.1)
@@ -90,4 +104,25 @@ anova(lm.season.0, lm.season.1)
 ```
 
 As we can see from the p-value there is strong evidence that at least one level in *season* has a strong effect on the number of bike rentals. The value of the residual sums of squares also indicates this. In the model with the consideration of *season* the RSS is clearly deeper.
+
+### Year
+We also use a box plot to visualize the effect of year.
+
+```{r}
+ggplot(data = d.bike, aes(group=yr, y = cnt, x = yr)) +
+  geom_boxplot()
+```
+
+At first glance we can see that the number of bike rentals has increased in year 1 (2012). The median is above the median of year 0 (2011).
+
+## 3. Modelling the Data
+### Model Development
+
+### Linear Regression
+
+### Non-linear Regression
+
+### Poisson Regression
+
+### Logistic Regression
 
