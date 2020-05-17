@@ -61,7 +61,7 @@ library(ggplot2)
 ```
 
 ### Count
-In the very first step we would like to look at the distribution of count. For this purpose we create a histogram.
+In the very first step we would like to look at the distribution of the response variable count. For this purpose we create a histogram.
 ```{r}
 ggplot(data = d.bike, aes(x=cnt)) +
   geom_histogram(bins=30, colour="black", ylab="Frequency") + xlab("Count") + ylab("Frequency")
@@ -70,11 +70,18 @@ sd(d.bike$cnt)
 ```
 As we can see, this is a right skewed distribution. So in most hours - the number of bike rentals are hourly observations - between 0 and 30 bikes (the most left bar) are rented.
 
+### Date
+
+```{r}
+ggplot(data = d.bike, mapping = aes(y = cnt, x = as.Date(dteday))) +
+  geom_point() + scale_x_date(date_breaks = "1 year") + xlab("Date") + ylab("Count")
+```
+
 ### Season
 If we want to visualize the effect of the *season* on the number of bike rentals it is a good idea to use a box plot.
 ```{r}
 ggplot(data = d.bike, aes(group=season, y = cnt, x = as.factor(season))) +
-  geom_boxplot()
+  geom_boxplot() + xlab("Season") + ylab("Count")
 ```
 
 As the box plot shows, season 1 (spring) is particularly different from season 2, 3 and 4 (summer, autumn and winter). The median is lowest in spring, even lower than in winter. In summer, autumn and winter, the medians differ only marginally.  Since the medians differ partially, one can assume a slight effect. However, we want to examine this more closely.
@@ -114,6 +121,32 @@ ggplot(data = d.bike, aes(group=yr, y = cnt, x = yr)) +
 ```
 
 At first glance we can see that the number of bike rentals has increased in year 1 (2012). The median is above the median of year 0 (2011).
+
+```{r}
+lm.year.1 <- lm(cnt ~ as.factor(yr), data = d.bike)
+lm.year.0 <- lm(cnt ~ 1, data = d.bike)
+anova(lm.season.0, lm.season.1)
+```
+
+### Month
+```{r}
+ggplot(data = d.bike, aes(group=mnth, y = cnt, x = as.factor(mnth))) +
+  geom_boxplot() + scale_x_discrete(limits=seq(1,12)) + xlab("Month") + ylab("Count")
+```
+
+### Hour
+```{r}
+ggplot(data = d.bike, aes(group=hr, y = cnt, x = as.factor(hr))) +
+  geom_boxplot() + scale_x_discrete(limits=seq(1,23)) + xlab("Hour") + ylab("Count")
+```
+
+### Holiday
+```{r}
+ggplot(data = d.bike, aes(group=holiday, y = cnt, x = holiday)) +
+  geom_boxplot() + xlab("Holiday") + ylab("Count")
+```
+
+
 
 ## 3. Modelling the Data
 ### Model Development
