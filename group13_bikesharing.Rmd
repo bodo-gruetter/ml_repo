@@ -142,11 +142,63 @@ ggplot(data = d.bike, aes(group=hr, y = cnt, x = as.factor(hr))) +
 
 ### Holiday
 ```{r}
-ggplot(data = d.bike, aes(group=holiday, y = cnt, x = holiday)) +
+ggplot(data = d.bike, aes(group=holiday, y = cnt, x = as.factor(holiday))) +
   geom_boxplot() + xlab("Holiday") + ylab("Count")
 ```
 
+### Weekday
+```{r}
+ggplot(data = d.bike, aes(group=weekday, y= cnt, x = as.factor(weekday))) +
+  geom_boxplot() + xlab("Weekday") + ylab("Count")
+```
 
+### Working day
+```{r}
+ggplot(data = d.bike, aes(group=workingday, y = cnt, x = as.factor(workingday))) +
+  geom_boxplot() + xlab("Working day") + ylab("Count")
+```
+
+### Weather Situation
+```{r}
+ggplot(data = d.bike, aes(group=weathersit, y = cnt, x = as.factor(weathersit))) +
+  geom_boxplot()  + xlab("Weather Situation") + ylab("Count")
+```
+
+### Temperature
+```{r}
+ggplot(data = d.bike, mapping = aes(y = cnt, x = temp)) +
+  geom_point()  + xlab("Normalized Temp") + ylab("Count")
+```
+
+### Feeling Temperature
+```{r}
+ggplot(data = d.bike, mapping = aes(y = cnt, x = atemp)) +
+  geom_point() + xlab("Normalized Feeling Temp") + ylab("Count")
+```
+
+### Humidity
+```{r}
+ggplot(data = d.bike, mapping = aes(y = cnt, x = hum)) +
+  geom_point() + xlab("Humidity") + ylab("Count")
+```
+
+### Windspeed
+```{r}
+ggplot(data = d.bike, mapping = aes(y = cnt, x = windspeed)) +
+  geom_point() + xlab("Windspeed") + ylab("Count")
+```
+
+### Casual Users
+```{r}
+ggplot(data = d.bike, mapping = aes(y = cnt, x = casual)) +
+  geom_point() + xlab("Casual Users") + ylab("Count")
+```
+
+### Registered Users
+```{r}
+ggplot(data = d.bike, mapping = aes(y = cnt, x = registered)) +
+  geom_point() + xlab("Registered Users") + ylab("Count")
+```
 
 ## 3. Modelling the Data
 ### Model Development
