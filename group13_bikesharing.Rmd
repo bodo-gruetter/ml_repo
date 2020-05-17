@@ -90,3 +90,4 @@ anova(lm.season.0, lm.season.1)
 ```
 
 As we can see from the p-value there is strong evidence that at least one level in *season* has a strong effect on the number of bike rentals. The value of the residual sums of squares also indicates this. In the model with the consideration of *season* the RSS is clearly deeper.
+
