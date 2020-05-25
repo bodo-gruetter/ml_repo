@@ -218,3 +218,8 @@ summary(poi.bike.1)
 
 ### Logistic Regression
 
+## 4. Trees
+
+## 5. Support Vector Machines
+
+## 6. Neural Networks
