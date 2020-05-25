@@ -208,10 +208,13 @@ ggplot(data = d.bike, mapping = aes(y = cnt, x = registered)) +
 ### Non-linear Regression
 
 ### Poisson Regression
+
 ```{r}
 poi.bike.1 <- glm(cnt ~ as.Date(dteday) + as.factor(season) + as.factor(yr) + as.factor(mnth) + as.factor(hr) + as.factor(holiday) + as.factor(weekday) + as.factor(workingday) + as.factor(weathersit) + temp + atemp + hum + windspeed, family = "poisson", data = d.bike)
 summary(poi.bike.1)
 ```
+
+
 
 ### Logistic Regression
 

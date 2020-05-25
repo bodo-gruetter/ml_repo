@@ -650,6 +650,86 @@ anova(lm.season.0, lm.season.1)</code></pre>
 </div>
 <div id="poisson-regression" class="section level3">
 <h3>Poisson Regression</h3>
+<pre class="r"><code>poi.bike.1 &lt;- glm(cnt ~ as.Date(dteday) + as.factor(season) + as.factor(yr) + as.factor(mnth) + as.factor(hr) + as.factor(holiday) + as.factor(weekday) + as.factor(workingday) + as.factor(weathersit) + temp + atemp + hum + windspeed, family = &quot;poisson&quot;, data = d.bike)
+summary(poi.bike.1)</code></pre>
+<pre><code>## 
+## Call:
+## glm(formula = cnt ~ as.Date(dteday) + as.factor(season) + as.factor(yr) + 
+##     as.factor(mnth) + as.factor(hr) + as.factor(holiday) + as.factor(weekday) + 
+##     as.factor(workingday) + as.factor(weathersit) + temp + atemp + 
+##     hum + windspeed, family = &quot;poisson&quot;, data = d.bike)
+## 
+## Deviance Residuals: 
+##      Min        1Q    Median        3Q       Max  
+## -25.2799   -3.7739   -0.8629    3.0390   22.7062  
+## 
+## Coefficients: (1 not defined because of singularities)
+##                          Estimate Std. Error  z value Pr(&gt;|z|)    
+## (Intercept)             2.646e+01  9.493e-01   27.874  &lt; 2e-16 ***
+## as.Date(dteday)        -1.571e-03  6.334e-05  -24.801  &lt; 2e-16 ***
+## as.factor(season)2      2.732e-01  3.692e-03   74.013  &lt; 2e-16 ***
+## as.factor(season)3      2.730e-01  4.237e-03   64.419  &lt; 2e-16 ***
+## as.factor(season)4      4.690e-01  4.134e-03  113.442  &lt; 2e-16 ***
+## as.factor(yr)1          1.043e+00  2.320e-02   44.965  &lt; 2e-16 ***
+## as.factor(mnth)2        1.610e-01  4.234e-03   38.027  &lt; 2e-16 ***
+## as.factor(mnth)3        3.197e-01  5.515e-03   57.965  &lt; 2e-16 ***
+## as.factor(mnth)4        3.244e-01  7.793e-03   41.623  &lt; 2e-16 ***
+## as.factor(mnth)5        4.358e-01  9.456e-03   46.091  &lt; 2e-16 ***
+## as.factor(mnth)6        4.331e-01  1.106e-02   39.158  &lt; 2e-16 ***
+## as.factor(mnth)7        3.787e-01  1.281e-02   29.557  &lt; 2e-16 ***
+## as.factor(mnth)8        5.228e-01  1.447e-02   36.129  &lt; 2e-16 ***
+## as.factor(mnth)9        6.462e-01  1.608e-02   40.190  &lt; 2e-16 ***
+## as.factor(mnth)10       6.059e-01  1.770e-02   34.223  &lt; 2e-16 ***
+## as.factor(mnth)11       5.279e-01  1.955e-02   26.998  &lt; 2e-16 ***
+## as.factor(mnth)12       5.598e-01  2.126e-02   26.327  &lt; 2e-16 ***
+## as.factor(hr)1         -4.667e-01  8.182e-03  -57.040  &lt; 2e-16 ***
+## as.factor(hr)2         -8.398e-01  9.313e-03  -90.177  &lt; 2e-16 ***
+## as.factor(hr)3         -1.508e+00  1.216e-02 -123.973  &lt; 2e-16 ***
+## as.factor(hr)4         -2.111e+00  1.586e-02 -133.101  &lt; 2e-16 ***
+## as.factor(hr)5         -9.567e-01  9.787e-03  -97.756  &lt; 2e-16 ***
+## as.factor(hr)6          4.004e-01  6.619e-03   60.499  &lt; 2e-16 ***
+## as.factor(hr)7          1.423e+00  5.666e-03  251.115  &lt; 2e-16 ***
+## as.factor(hr)8          1.917e+00  5.423e-03  353.438  &lt; 2e-16 ***
+## as.factor(hr)9          1.392e+00  5.648e-03  246.494  &lt; 2e-16 ***
+## as.factor(hr)10         1.124e+00  5.806e-03  193.524  &lt; 2e-16 ***
+## as.factor(hr)11         1.270e+00  5.717e-03  222.190  &lt; 2e-16 ***
+## as.factor(hr)12         1.448e+00  5.642e-03  256.683  &lt; 2e-16 ***
+## as.factor(hr)13         1.428e+00  5.663e-03  252.140  &lt; 2e-16 ***
+## as.factor(hr)14         1.366e+00  5.708e-03  239.283  &lt; 2e-16 ***
+## as.factor(hr)15         1.406e+00  5.693e-03  246.960  &lt; 2e-16 ***
+## as.factor(hr)16         1.629e+00  5.593e-03  291.271  &lt; 2e-16 ***
+## as.factor(hr)17         2.037e+00  5.445e-03  374.129  &lt; 2e-16 ***
+## as.factor(hr)18         1.971e+00  5.443e-03  362.168  &lt; 2e-16 ***
+## as.factor(hr)19         1.675e+00  5.518e-03  303.650  &lt; 2e-16 ***
+## as.factor(hr)20         1.378e+00  5.648e-03  243.973  &lt; 2e-16 ***
+## as.factor(hr)21         1.122e+00  5.800e-03  193.493  &lt; 2e-16 ***
+## as.factor(hr)22         8.652e-01  6.005e-03  144.079  &lt; 2e-16 ***
+## as.factor(hr)23         4.841e-01  6.419e-03   75.418  &lt; 2e-16 ***
+## as.factor(holiday)1    -1.625e-01  3.797e-03  -42.788  &lt; 2e-16 ***
+## as.factor(weekday)1     5.167e-02  2.168e-03   23.839  &lt; 2e-16 ***
+## as.factor(weekday)2     6.135e-02  2.103e-03   29.171  &lt; 2e-16 ***
+## as.factor(weekday)3     6.707e-02  2.103e-03   31.896  &lt; 2e-16 ***
+## as.factor(weekday)4     6.770e-02  2.089e-03   32.401  &lt; 2e-16 ***
+## as.factor(weekday)5     9.430e-02  2.089e-03   45.136  &lt; 2e-16 ***
+## as.factor(weekday)6     7.990e-02  2.092e-03   38.202  &lt; 2e-16 ***
+## as.factor(workingday)1         NA         NA       NA       NA    
+## as.factor(weathersit)2 -6.542e-02  1.423e-03  -45.979  &lt; 2e-16 ***
+## as.factor(weathersit)3 -4.951e-01  2.865e-03 -172.825  &lt; 2e-16 ***
+## as.factor(weathersit)4 -4.739e-01  6.707e-02   -7.067 1.59e-12 ***
+## temp                    1.833e-01  1.946e-02    9.421  &lt; 2e-16 ***
+## atemp                   9.251e-01  2.031e-02   45.544  &lt; 2e-16 ***
+## hum                    -2.010e-01  4.134e-03  -48.612  &lt; 2e-16 ***
+## windspeed              -1.094e-01  4.870e-03  -22.468  &lt; 2e-16 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## (Dispersion parameter for poisson family taken to be 1)
+## 
+##     Null deviance: 2891591  on 17378  degrees of freedom
+## Residual deviance:  571396  on 17325  degrees of freedom
+## AIC: 682405
+## 
+## Number of Fisher Scoring iterations: 5</code></pre>
 </div>
 <div id="logistic-regression" class="section level3">
 <h3>Logistic Regression</h3>
