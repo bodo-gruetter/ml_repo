@@ -200,8 +200,7 @@ ggplot(data = d.bike, mapping = aes(y = cnt, x = registered)) +
   geom_point() + xlab("Registered Users") + ylab("Count")
 ```
 
-## 3. Modelling the Data
-### Model Development
+## 3. Regression Analysis
 
 ### Linear Regression
 
@@ -217,6 +216,9 @@ summary(poi.bike.1)
 
 
 ### Logistic Regression
+
+### Cross Validation (simple versus complex Model)
+
 
 ## 4. Trees
 
