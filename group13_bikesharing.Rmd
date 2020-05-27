@@ -134,31 +134,52 @@ ggplot(data = d.bike, aes(group=mnth, y = cnt, x = as.factor(mnth))) +
   geom_boxplot() + scale_x_discrete(limits=seq(1,12)) + xlab("Month") + ylab("Count")
 ```
 
+Here we see that the bike rental increased during the summer months 5 to 9 or when the temperatures were more pleasant.
+
+```{r}
+lm.month.1 <- lm(cnt ~ as.factor(mnth), data = d.bike)
+lm.month.0 <- lm(cnt ~ 1, data = d.bike)
+anova(lm.season.0, lm.season.1)
+```
+
 ### Hour
 ```{r}
 ggplot(data = d.bike, aes(group=hr, y = cnt, x = as.factor(hr))) +
   geom_boxplot() + scale_x_discrete(limits=seq(1,23)) + xlab("Hour") + ylab("Count")
 ```
 
+The same applies to the time of day and hour. Bikes were most often rented in the morning between 7 and 8 pm. and in the evening between 5 and 6 am.
+
+```{r}
+lm.month.1 <- lm(cnt ~ as.factor(hr), data = d.bike)
+lm.month.0 <- lm(cnt ~ 1, data = d.bike)
+anova(lm.season.0, lm.season.1)
+```
+
+
 ### Holiday
+//Anova hinzufügen
 ```{r}
 ggplot(data = d.bike, aes(group=holiday, y = cnt, x = as.factor(holiday))) +
   geom_boxplot() + xlab("Holiday") + ylab("Count")
 ```
 
 ### Weekday
+//Anova hinzufügen
 ```{r}
 ggplot(data = d.bike, aes(group=weekday, y= cnt, x = as.factor(weekday))) +
   geom_boxplot() + xlab("Weekday") + ylab("Count")
 ```
 
 ### Working day
+//Anova hinzufügen
 ```{r}
 ggplot(data = d.bike, aes(group=workingday, y = cnt, x = as.factor(workingday))) +
   geom_boxplot() + xlab("Working day") + ylab("Count")
 ```
 
 ### Weather Situation
+//Anova hinzufügen
 ```{r}
 ggplot(data = d.bike, aes(group=weathersit, y = cnt, x = as.factor(weathersit))) +
   geom_boxplot()  + xlab("Weather Situation") + ylab("Count")
