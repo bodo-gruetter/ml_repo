@@ -134,7 +134,7 @@ ggplot(data = d.bike, aes(group=mnth, y = cnt, x = as.factor(mnth))) +
   geom_boxplot() + scale_x_discrete(limits=seq(1,12)) + xlab("Month") + ylab("Count")
 ```
 
-Here we see that the bike rental increased during the summer months 5 to 9 or when the temperatures were more pleasant.
+Here we see that the bike rental increased during the summer months May to September or when the temperatures were more pleasant.
 
 ```{r}
 lm.month.1 <- lm(cnt ~ as.factor(mnth), data = d.bike)
@@ -148,7 +148,7 @@ ggplot(data = d.bike, aes(group=hr, y = cnt, x = as.factor(hr))) +
   geom_boxplot() + scale_x_discrete(limits=seq(1,23)) + xlab("Hour") + ylab("Count")
 ```
 
-The same applies to the time of day and hour. Bikes were most often rented in the morning between 7 and 8 pm. and in the evening between 5 and 6 am.
+The same applies to the time of day and hour. Bikes were most often rented in the morning between 7 and 8 pm. and in the evening between 5 and 6 am. The same flow also applies to the median.
 
 ```{r}
 lm.month.1 <- lm(cnt ~ as.factor(hr), data = d.bike)
@@ -156,33 +156,60 @@ lm.month.0 <- lm(cnt ~ 1, data = d.bike)
 anova(lm.season.0, lm.season.1)
 ```
 
-
 ### Holiday
-//Anova hinzufügen
 ```{r}
 ggplot(data = d.bike, aes(group=holiday, y = cnt, x = as.factor(holiday))) +
   geom_boxplot() + xlab("Holiday") + ylab("Count")
 ```
 
+During the holiday period, fewer bikes are rented according to the boxplot diagram. However, the difference is very pleasant compared to the normal working period. The holiday period median is close to the work time median.
+
+```{r}
+lm.month.1 <- lm(cnt ~ as.factor(holiday), data = d.bike)
+lm.month.0 <- lm(cnt ~ 1, data = d.bike)
+anova(lm.season.0, lm.season.1)
+```
+
 ### Weekday
-//Anova hinzufügen
 ```{r}
 ggplot(data = d.bike, aes(group=weekday, y= cnt, x = as.factor(weekday))) +
   geom_boxplot() + xlab("Weekday") + ylab("Count")
 ```
 
+During all seven days of the week, the bike rental is almost constant. On Monday and Sunday there are less bikes rented. The median is lowest on Monday and highest on Saturday. On all other days the median is similar.  
+
+```{r}
+lm.month.1 <- lm(cnt ~ as.factor(weekday), data = d.bike)
+lm.month.0 <- lm(cnt ~ 1, data = d.bike)
+anova(lm.season.0, lm.season.1)
+```
+
 ### Working day
-//Anova hinzufügen
 ```{r}
 ggplot(data = d.bike, aes(group=workingday, y = cnt, x = as.factor(workingday))) +
   geom_boxplot() + xlab("Working day") + ylab("Count")
 ```
 
+On working or not-working days, the count of the bike rentals are almost equal. This is also identical with the both medians.
+
+```{r}
+lm.month.1 <- lm(cnt ~ as.factor(workingday), data = d.bike)
+lm.month.0 <- lm(cnt ~ 1, data = d.bike)
+anova(lm.season.0, lm.season.1)
+```
+
 ### Weather Situation
-//Anova hinzufügen
 ```{r}
 ggplot(data = d.bike, aes(group=weathersit, y = cnt, x = as.factor(weathersit))) +
   geom_boxplot()  + xlab("Weather Situation") + ylab("Count")
+```
+
+If we look at the weather divided on a scale between 1 and 4 as shown in the boxplot, we see that the bike rental is steadily decreasing from 1 to 4. The value 1 is the good weather and 4 the bad weather. Whereby from the value 3 away, probably already bad weather, the renting goes down faster. An identical flow can also be observed for the medians, starting from the first box plot 1 to 4.
+
+```{r}
+lm.month.1 <- lm(cnt ~ as.factor(weathersit), data = d.bike)
+lm.month.0 <- lm(cnt ~ 1, data = d.bike)
+anova(lm.season.0, lm.season.1)
 ```
 
 ### Temperature
