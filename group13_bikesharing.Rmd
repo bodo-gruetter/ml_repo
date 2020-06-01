@@ -305,16 +305,16 @@ ggplot(data = d.bike, mapping = aes(y = cnt, x = registered)) +
 
 Both casual and registered users show a positive effect and explain a large part of the data with the model. This suggests that casual and registered users need not be considered separately. Furthermore, casual and registered users are not further distinguished and are therefore not considered in the model.
 
-### Hypothesis
+
+## 3. Regression Analysis
+
+### Model development
+
 In this section, the insights gained from the exploratory data analysis and the consideration of the individual attributes should help to form a hypothesis about what the final model might look like. This hypothesis is the starting point for developing the model.
 
 The explorative data analysis has shown that the attributes season, yr, mnth, hr, weathersit, temp, atemp and hum can probably be considered in the model. From this, the following model can be assumed:
 
     cnt = season + year + mnth + hr + weathersit + temp + atemp + hum
-
-## 3. Regression Analysis
-
-### Model developing 
 
 ### Linear Regression
 
