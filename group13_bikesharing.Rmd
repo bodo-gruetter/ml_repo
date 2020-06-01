@@ -41,7 +41,7 @@ The dataset contains hourly information about a day and its weather conditions i
 * *cnt*: number of total rentals
 
 ### Feature Selection
-We decide to delete the feature *instant* and *dteday*. *instant* is a record index that has been artificially created and *dteday* is the date of the record. Therefore both will have no relevant effect on *cnt*.
+We decide to delete the feature *instant* and *dteday*. *instant* is a record index that has been artificially created. Therefore it will have no relevant effect on *cnt*. *dteday* is the date of the record. With the other attributes as *season*, *yr*, *mnth* and *hr* we will already look at the daily aspect in more detail.
 
 ```{r}
 d.bike <- subset(d.bike, select=-c(instant, dteday))
@@ -62,9 +62,15 @@ mean(is.na(d.bike))
 The record contains no rows with missing data. Now we are ready for the further analysis steps.
 
 ### Creating training and test data set
+```{r}
+set.seed(12)
+nrow(d.bike)*0.7
 
+```
 
 ## 2. Explorative Data Analysis
+In this section each attribute is considered to make certain assumptions. Different statistical diagrams are used for this purpose. The effects of the different attributes on cnt are tested using ANOVA for categorical attributes and a linear regression model for numerical values. The aim of this explorative data analysis is to get a starting point for the model building.
+
 Because ggplot allows elegant data visualization with the same syntax for different types of data models, we decide to use ggplot exclusively for graphical representations as far as possible. Therefore we import ggplot2.
 ```{r}
 library(ggplot2)
@@ -115,6 +121,7 @@ lm.year.0 <- lm(cnt ~ 1, data = d.bike)
 anova(lm.year.0, lm.year.1)
 ```
 
+The p-value shows strong evidence that one of the two years 2010 and 2011 have a significant effect on cnt. Furthermore, the RSS shows that the more complex model lm.year.1 has significantly smaller residuals than the simpler one.
 
 ### Month
 ```{r}
@@ -122,7 +129,7 @@ ggplot(data = d.bike, aes(group=mnth, y = cnt, x = as.factor(mnth))) +
   geom_boxplot() + scale_x_discrete(limits=seq(1,12)) + xlab("Month") + ylab("Count")
 ```
 
-Here we see that the bike rental increased during the summer months May to September or when the temperatures were more pleasant.
+Here we see that the bike rental increased during the summer months May to September or when the temperatures were more pleasant. Visually, the months seem to have an effect on cnt.
 
 ```{r}
 lm.month.1 <- lm(cnt ~ as.factor(mnth), data = d.bike)
@@ -130,19 +137,24 @@ lm.month.0 <- lm(cnt ~ 1, data = d.bike)
 anova(lm.month.0, lm.month.1)
 ```
 
+As the p-value shows, there is strong evidence that at least one month must have a significant effect on cnt. Also the RSS shows little surprising. The more complex model lm.month.1 seems to represent the data better than the model lm.month.0.
+
+
 ### Hour
 ```{r}
 ggplot(data = d.bike, aes(group=hr, y = cnt, x = as.factor(hr))) +
   geom_boxplot() + scale_x_discrete(limits=seq(1,23)) + xlab("Hour") + ylab("Count")
 ```
 
-The same applies to the time of day and hour. Bikes were most often rented in the morning between 7 and 8 pm. and in the evening between 5 and 6 am. The same flow also applies to the median.
+The same applies to the time of day and hour. Bikes were most often rented in the morning between 7 and 8 am. and in the evening between 5 and 6 pm. The same flow also applies to the median. The individual times of day seem to differ greatly from one another.
 
 ```{r}
 lm.hr.1 <- lm(cnt ~ as.factor(hr), data = d.bike)
 lm.hr.0 <- lm(cnt ~ 1, data = d.bike)
 anova(lm.hr.0, lm.hr.1)
 ```
+
+The p-value also reflects this. At least one time of day has a significant effect on cnt. The RSS differs here extremely strongly between complex and simple models. The time of day will probably play a role in the final regression model.
 
 ### Holiday
 ```{r}
@@ -158,6 +170,8 @@ lm.holiday.0 <- lm(cnt ~ 1, data = d.bike)
 anova(lm.holiday.0, lm.holiday.1)
 ```
 
+The p-value shows strong evidence that no holiday and/or holiday has a significant effect on cnt. However, if we look at RSS at this point, which differs only minimally between simple and complex model, holiday could be a feature that will be not included in the model.
+
 ### Weekday
 ```{r}
 ggplot(data = d.bike, aes(group=weekday, y= cnt, x = as.factor(weekday))) +
@@ -171,6 +185,8 @@ lm.weekday.1 <- lm(cnt ~ as.factor(weekday), data = d.bike)
 lm.weekday.0 <- lm(cnt ~ 1, data = d.bike)
 anova(lm.weekday.0, lm.weekday.1)
 ```
+
+As the p-value shows, there is only medium evidence that at least one weekday has a significant effect on cnt. Also the RSS does not differ too much between simple and complex model. This leads to the conclusion that probably the weekday is not included in the final model.
 
 ### Working day
 ```{r}
@@ -186,6 +202,8 @@ lm.workingday.0 <- lm(cnt ~ 1, data = d.bike)
 anova(lm.workingday.0, lm.workingday.1)
 ```
 
+As the p-value shows, there is strong evidence that the no working day and/or working day has a significant effect on cnt. Again, the RSS does not differ very much. Working day possibly brings no benefit in the model and will probably be omitted.
+
 ### Weather Situation
 ```{r}
 ggplot(data = d.bike, aes(group=weathersit, y = cnt, x = as.factor(weathersit))) +
@@ -200,18 +218,24 @@ lm.weathersit.0 <- lm(cnt ~ 1, data = d.bike)
 anova(lm.weathersit.0, lm.weathersit.1)
 ```
 
+There is strong evidence that at least one weather situation has a significant effect on cnt. The RSS differs greatly between the two models. This will probably be a feature that makes it into the final model.
+
 ### Temperature
+
+Before we look at temperature graphically, we will fit a linear regression model to see if there is a positive or negative effect on cnt.
 
 ```{r}
 lm.temp.1 <- lm(cnt ~ temp, data = d.bike)
 summary(lm.temp.1)
 ``` 
 
+As the p-value shows, there is strong evidence that the slope is not flat, i.e. that there is a significant effect of temp on cnt. As the slope coefficient of temp (381.2949) shows, this is a positive correlation. Consequently, higher temperatures lead to more rented bicycles.
 
 ```{r}
 ggplot(data = d.bike, mapping = aes(y = cnt, x = temp)) +
   geom_point()  + xlab("Normalized Temp") + ylab("Count") + geom_abline(intercept=lm.temp.1$coefficients[1], slope=lm.temp.1$coefficients[2], colour="red", size=1)
 ``` 
+
 
 
 ### Feeling Temperature
