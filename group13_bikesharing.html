@@ -841,9 +841,6 @@ summary(lm.registered.1)</code></pre>
 </div>
 <div id="poisson-regression" class="section level3">
 <h3>Poisson Regression</h3>
-</div>
-<div id="final-model" class="section level3">
-<h3>Final model</h3>
 <pre class="r"><code>poi.bike.1 &lt;- glm(cnt ~ as.factor(season) + as.factor(yr) + as.factor(mnth) + as.factor(hr) + as.factor(weathersit) + temp + atemp + hum, family = &quot;poisson&quot;, data = d.bike)
 summary(poi.bike.1)</code></pre>
 <pre><code>## 
@@ -919,6 +916,9 @@ summary(poi.bike.1)</code></pre>
 </div>
 <div id="cross-validation-simple-versus-complex-model" class="section level3">
 <h3>Cross Validation (simple versus complex Model)</h3>
+</div>
+<div id="final-model" class="section level3">
+<h3>Final model</h3>
 </div>
 </div>
 <div id="trees" class="section level2">
