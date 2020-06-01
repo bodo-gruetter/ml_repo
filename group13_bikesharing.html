@@ -844,83 +844,73 @@ summary(lm.registered.1)</code></pre>
 </div>
 <div id="final-model" class="section level3">
 <h3>Final model</h3>
-<pre class="r"><code>poi.bike.1 &lt;- glm(cnt ~ as.factor(season) + as.factor(yr) + as.factor(mnth) + as.factor(hr) + as.factor(holiday) + as.factor(weekday) + as.factor(workingday) + as.factor(weathersit) + temp + atemp + hum + windspeed, family = &quot;poisson&quot;, data = d.bike)
+<pre class="r"><code>poi.bike.1 &lt;- glm(cnt ~ as.factor(season) + as.factor(yr) + as.factor(mnth) + as.factor(hr) + as.factor(weathersit) + temp + atemp + hum, family = &quot;poisson&quot;, data = d.bike)
 summary(poi.bike.1)</code></pre>
 <pre><code>## 
 ## Call:
 ## glm(formula = cnt ~ as.factor(season) + as.factor(yr) + as.factor(mnth) + 
-##     as.factor(hr) + as.factor(holiday) + as.factor(weekday) + 
-##     as.factor(workingday) + as.factor(weathersit) + temp + atemp + 
-##     hum + windspeed, family = &quot;poisson&quot;, data = d.bike)
+##     as.factor(hr) + as.factor(weathersit) + temp + atemp + hum, 
+##     family = &quot;poisson&quot;, data = d.bike)
 ## 
 ## Deviance Residuals: 
 ##      Min        1Q    Median        3Q       Max  
-## -24.9615   -3.7666   -0.8567    3.0347   22.3749  
+## -26.5593   -3.7762   -0.8085    3.0855   22.8623  
 ## 
-## Coefficients: (1 not defined because of singularities)
+## Coefficients:
 ##                         Estimate Std. Error  z value Pr(&gt;|z|)    
-## (Intercept)             2.917336   0.006790  429.640  &lt; 2e-16 ***
-## as.factor(season)2      0.274076   0.003680   74.487  &lt; 2e-16 ***
-## as.factor(season)3      0.267228   0.004211   63.457  &lt; 2e-16 ***
-## as.factor(season)4      0.457991   0.004081  112.212  &lt; 2e-16 ***
-## as.factor(yr)1          0.468566   0.001151  407.080  &lt; 2e-16 ***
-## as.factor(mnth)2        0.113516   0.003776   30.060  &lt; 2e-16 ***
-## as.factor(mnth)3        0.223665   0.003937   56.817  &lt; 2e-16 ***
-## as.factor(mnth)4        0.181289   0.005235   34.629  &lt; 2e-16 ***
-## as.factor(mnth)5        0.244655   0.005477   44.668  &lt; 2e-16 ***
-## as.factor(mnth)6        0.196362   0.005585   35.158  &lt; 2e-16 ***
-## as.factor(mnth)7        0.098808   0.006064   16.294  &lt; 2e-16 ***
-## as.factor(mnth)8        0.195102   0.005898   33.078  &lt; 2e-16 ***
-## as.factor(mnth)9        0.270869   0.005427   49.914  &lt; 2e-16 ***
-## as.factor(mnth)10       0.187711   0.005395   34.794  &lt; 2e-16 ***
-## as.factor(mnth)11       0.061117   0.005303   11.524  &lt; 2e-16 ***
-## as.factor(mnth)12       0.045360   0.004676    9.700  &lt; 2e-16 ***
-## as.factor(hr)1         -0.466697   0.008182  -57.038  &lt; 2e-16 ***
-## as.factor(hr)2         -0.839682   0.009313  -90.160  &lt; 2e-16 ***
-## as.factor(hr)3         -1.507858   0.012163 -123.967  &lt; 2e-16 ***
-## as.factor(hr)4         -2.110448   0.015858 -133.084  &lt; 2e-16 ***
-## as.factor(hr)5         -0.956562   0.009787  -97.738  &lt; 2e-16 ***
-## as.factor(hr)6          0.400501   0.006619   60.509  &lt; 2e-16 ***
-## as.factor(hr)7          1.422874   0.005666  251.117  &lt; 2e-16 ***
-## as.factor(hr)8          1.916567   0.005423  353.411  &lt; 2e-16 ***
-## as.factor(hr)9          1.391883   0.005648  246.429  &lt; 2e-16 ***
-## as.factor(hr)10         1.123194   0.005806  193.438  &lt; 2e-16 ***
-## as.factor(hr)11         1.269596   0.005717  222.071  &lt; 2e-16 ***
-## as.factor(hr)12         1.447484   0.005642  256.544  &lt; 2e-16 ***
-## as.factor(hr)13         1.427091   0.005663  251.991  &lt; 2e-16 ***
-## as.factor(hr)14         1.364773   0.005707  239.121  &lt; 2e-16 ***
-## as.factor(hr)15         1.405023   0.005693  246.794  &lt; 2e-16 ***
-## as.factor(hr)16         1.628120   0.005593  291.123  &lt; 2e-16 ***
-## as.factor(hr)17         2.036233   0.005445  373.972  &lt; 2e-16 ***
-## as.factor(hr)18         1.970299   0.005443  362.018  &lt; 2e-16 ***
-## as.factor(hr)19         1.674864   0.005518  303.540  &lt; 2e-16 ***
-## as.factor(hr)20         1.377556   0.005648  243.882  &lt; 2e-16 ***
-## as.factor(hr)21         1.121995   0.005800  193.434  &lt; 2e-16 ***
-## as.factor(hr)22         0.864956   0.006005  144.039  &lt; 2e-16 ***
-## as.factor(hr)23         0.483910   0.006419   75.382  &lt; 2e-16 ***
-## as.factor(holiday)1    -0.160979   0.003797  -42.398  &lt; 2e-16 ***
-## as.factor(weekday)1     0.051206   0.002167   23.626  &lt; 2e-16 ***
-## as.factor(weekday)2     0.060927   0.002103   28.971  &lt; 2e-16 ***
-## as.factor(weekday)3     0.066408   0.002103   31.582  &lt; 2e-16 ***
-## as.factor(weekday)4     0.067338   0.002089   32.228  &lt; 2e-16 ***
-## as.factor(weekday)5     0.093581   0.002089   44.798  &lt; 2e-16 ***
-## as.factor(weekday)6     0.079608   0.002091   38.063  &lt; 2e-16 ***
-## as.factor(workingday)1        NA         NA       NA       NA    
-## as.factor(weathersit)2 -0.064256   0.001422  -45.175  &lt; 2e-16 ***
-## as.factor(weathersit)3 -0.492963   0.002864 -172.124  &lt; 2e-16 ***
-## as.factor(weathersit)4 -0.469206   0.067067   -6.996 2.63e-12 ***
-## temp                    0.164396   0.019469    8.444  &lt; 2e-16 ***
-## atemp                   0.946850   0.020326   46.584  &lt; 2e-16 ***
-## hum                    -0.205716   0.004129  -49.824  &lt; 2e-16 ***
-## windspeed              -0.109958   0.004869  -22.581  &lt; 2e-16 ***
+## (Intercept)             2.950439   0.006499  453.989  &lt; 2e-16 ***
+## as.factor(season)2      0.281329   0.003676   76.539  &lt; 2e-16 ***
+## as.factor(season)3      0.279559   0.004205   66.485  &lt; 2e-16 ***
+## as.factor(season)4      0.474788   0.004065  116.802  &lt; 2e-16 ***
+## as.factor(yr)1          0.469074   0.001150  407.842  &lt; 2e-16 ***
+## as.factor(mnth)2        0.117750   0.003775   31.195  &lt; 2e-16 ***
+## as.factor(mnth)3        0.232532   0.003927   59.207  &lt; 2e-16 ***
+## as.factor(mnth)4        0.175691   0.005225   33.623  &lt; 2e-16 ***
+## as.factor(mnth)5        0.246914   0.005469   45.149  &lt; 2e-16 ***
+## as.factor(mnth)6        0.205196   0.005562   36.894  &lt; 2e-16 ***
+## as.factor(mnth)7        0.099689   0.006042   16.498  &lt; 2e-16 ***
+## as.factor(mnth)8        0.202695   0.005878   34.482  &lt; 2e-16 ***
+## as.factor(mnth)9        0.269281   0.005415   49.730  &lt; 2e-16 ***
+## as.factor(mnth)10       0.182622   0.005388   33.893  &lt; 2e-16 ***
+## as.factor(mnth)11       0.047838   0.005292    9.040  &lt; 2e-16 ***
+## as.factor(mnth)12       0.043270   0.004672    9.261  &lt; 2e-16 ***
+## as.factor(hr)1         -0.466373   0.008182  -56.998  &lt; 2e-16 ***
+## as.factor(hr)2         -0.839037   0.009313  -90.092  &lt; 2e-16 ***
+## as.factor(hr)3         -1.506894   0.012163 -123.889  &lt; 2e-16 ***
+## as.factor(hr)4         -2.110383   0.015858 -133.080  &lt; 2e-16 ***
+## as.factor(hr)5         -0.955802   0.009787  -97.661  &lt; 2e-16 ***
+## as.factor(hr)6          0.400080   0.006619   60.447  &lt; 2e-16 ***
+## as.factor(hr)7          1.421694   0.005666  250.919  &lt; 2e-16 ***
+## as.factor(hr)8          1.914036   0.005422  352.989  &lt; 2e-16 ***
+## as.factor(hr)9          1.388003   0.005647  245.798  &lt; 2e-16 ***
+## as.factor(hr)10         1.118215   0.005805  192.646  &lt; 2e-16 ***
+## as.factor(hr)11         1.264333   0.005715  221.238  &lt; 2e-16 ***
+## as.factor(hr)12         1.441425   0.005639  255.604  &lt; 2e-16 ***
+## as.factor(hr)13         1.420631   0.005660  251.006  &lt; 2e-16 ***
+## as.factor(hr)14         1.357159   0.005702  238.008  &lt; 2e-16 ***
+## as.factor(hr)15         1.397367   0.005687  245.696  &lt; 2e-16 ***
+## as.factor(hr)16         1.620237   0.005586  290.041  &lt; 2e-16 ***
+## as.factor(hr)17         2.028811   0.005439  372.986  &lt; 2e-16 ***
+## as.factor(hr)18         1.963548   0.005438  361.086  &lt; 2e-16 ***
+## as.factor(hr)19         1.669552   0.005515  302.745  &lt; 2e-16 ***
+## as.factor(hr)20         1.374013   0.005647  243.315  &lt; 2e-16 ***
+## as.factor(hr)21         1.119994   0.005800  193.103  &lt; 2e-16 ***
+## as.factor(hr)22         0.863821   0.006005  143.854  &lt; 2e-16 ***
+## as.factor(hr)23         0.483898   0.006419   75.380  &lt; 2e-16 ***
+## as.factor(weathersit)2 -0.059458   0.001418  -41.944  &lt; 2e-16 ***
+## as.factor(weathersit)3 -0.491411   0.002847 -172.602  &lt; 2e-16 ***
+## as.factor(weathersit)4 -0.453229   0.067060   -6.759 1.39e-11 ***
+## temp                    0.129878   0.019387    6.699 2.10e-11 ***
+## atemp                   0.974010   0.020273   48.045  &lt; 2e-16 ***
+## hum                    -0.208483   0.004072  -51.205  &lt; 2e-16 ***
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## 
 ## (Dispersion parameter for poisson family taken to be 1)
 ## 
 ##     Null deviance: 2891591  on 17378  degrees of freedom
-## Residual deviance:  572011  on 17326  degrees of freedom
-## AIC: 683018
+## Residual deviance:  577039  on 17334  degrees of freedom
+## AIC: 688030
 ## 
 ## Number of Fisher Scoring iterations: 5</code></pre>
 </div>
