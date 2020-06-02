@@ -340,10 +340,6 @@ summary(poi.bike.1)
 
 ### Logistic Regression
 
-### Cross Validation (simple versus complex Model)
-
-### Final model
-
 
 ## 4. Trees
 
