@@ -7,7 +7,7 @@ We downloaded the dataset "bikesharing.csv" from https://code.datasciencedojo.co
 
 ### Loading the data
 In a first step the dataset is imported to R and stored in the data.frame *d.bike*:
-```{r}
+  ```{r}
 d.bike <- read.csv("bikesharing.csv", header=TRUE)
 ```
 
@@ -17,8 +17,8 @@ str(d.bike)
 ```
 
 The dataset contains hourly information about a day and its weather conditions in 17379 observations of 17 variables. In the following, the individual attributes will be explained:
-
-* *instant*: record index
+  
+  * *instant*: record index
 * *dteday*: Date
 * *season*: 1 = spring, 2 = summer, 3 = fall, 4 = winter
 * *yr*: Year; 0: 2011, 1: 2012
@@ -29,9 +29,9 @@ The dataset contains hourly information about a day and its weather conditions i
 * *workingday*: 0 = weekend or holiday, 1 = working day
 * *weathersit*:
   + 1: Clear, Few clouds, Partly cloudy, Partly cloudy
-  + 2: Mist + Cloudy, Mist + Broken clouds, Mist + Few clouds, Mist
-  + 3: Light Snow, Light Rain + Thunderstorm + Scattered clouds, Light Rain + Scattered clouds
-  + 4: Heavy Rain + Ice Pallets + Thunderstorm + Mist, Snow + Fog 
++ 2: Mist + Cloudy, Mist + Broken clouds, Mist + Few clouds, Mist
++ 3: Light Snow, Light Rain + Thunderstorm + Scattered clouds, Light Rain + Scattered clouds
++ 4: Heavy Rain + Ice Pallets + Thunderstorm + Mist, Snow + Fog 
 * *temp*: Normalized temperature in Celsius; The values are derived via (t-t_min)/(t_max-t_min),   t_min=-8, t_max=+39;
 * *atemp*:  Normalized feeling temperature in Celsius; Normalized   feeling temperature in Celsius. The values are derived via (t-t_min)/(t_max-t_min), t_min=-16, t_max=+50
 * *hum*: Normalized relative humidity; The values are divided to 100 (max); 
@@ -65,7 +65,6 @@ The record contains no rows with missing data. Now we are ready for the further 
 ```{r}
 set.seed(12)
 nrow(d.bike)*0.7
-
 ```
 
 ## 2. Explorative Data Analysis
@@ -222,62 +221,53 @@ There is strong evidence that at least one weather situation has a significant e
 
 ### Temperature
 
+Before we look at temperature graphically, we will fit a linear regression model to see if there is a positive or negative effect on cnt.
+
+```{r}
+lm.temp.1 <- lm(cnt ~ temp, data = d.bike)
+summary(lm.temp.1)
+``` 
+
+As the p-value shows, there is strong evidence that the slope is not flat, i.e. that there is a significant effect of temp on cnt. As the slope coefficient of temp (381.2949) shows, this is a positive correlation. Consequently, higher temperatures lead to more rented bicycles.
+
 ```{r}
 ggplot(data = d.bike, mapping = aes(y = cnt, x = temp)) +
-  geom_point()  + xlab("Normalized Temp") + ylab("Count") + geom_smooth()
+  geom_point()  + xlab("Normalized Temp") + ylab("Count") + geom_abline(intercept=lm.temp.1$coefficients[1], slope=lm.temp.1$coefficients[2], colour="red", size=1)
 ``` 
 
-The representation of the regression line confirms the positive correlation. As the smoothing spline shows, temperature is a more complex relationship than linearity. It is possible that a Generalised Additive Model (GAM) could be used if temp is considered in the final model. As it seems higher temperatures lead to a higher number of rented bikes.
-
-```{r}
-library(mgcv)
-gam.temp.1 <- gam(cnt ~ s(temp), data = d.bike)
-summary(gam.temp.1)
-``` 
-
-First, a relatively high estimated degree of freedom (edf) of 8,747 is striking. This indicates the high complexity of the relationship. The p-value shows strong evidence that the slope is not 0 and thus there is a correlation between temp and cnt. The adjusted R-Squared shows that 17 percent of the variability is explained by the data. Thus temp could play a role in the final model.
+The representation of the regression line confirms the positive correlation. An R-square can also be seen, according to which about 16% of the data is explained by the model.
 
 ### Feeling Temperature
 
-```{r}
-ggplot(data = d.bike, mapping = aes(y = cnt, x = atemp)) +
-  geom_point() + xlab("Normalized Feeling Temp") + ylab("Count") + geom_smooth()
-```
-
-Not surprisingly, atemp is also related to a higher degree of complexity. So again a GAM is useful to investigate the effect of atemp on cnt.
+Since the felt temperature is also a numerical value, we use a linear regression model here to check the effect from atemp on cnt.
 
 ```{r}
-gam.atemp.1 <- gam(cnt ~ s(atemp), data = d.bike)
-summary(gam.atemp.1)
+lm.atemp.1 <- lm(cnt ~ atemp, data = d.bike)
+summary(lm.atemp.1)
 ``` 
 
-The edf again shows a more complex relationship between atemp and cnt. The p-value shows strong evidence that the slope is not 0. The R-Squared shows that the model explains 17% of the data. Therefore, atemp could also play a role in the final model.
+The picture is similar to that of the measured temperature. The p-value shows strong evidence that atemp has a significant effect on cnt. Not surprisingly, this is again a positive correlation.
+
+```{r}
+ggplot(data = d.bike, mapping = aes(y = cnt, x = atemp)) +
+  geom_point() + xlab("Normalized Feeling Temp") + ylab("Count") + geom_abline(intercept=lm.atemp.1$coefficients[1], slope=lm.atemp.1$coefficients[2], colour="red", size=1)
+```
 
 ### Humidity
 
 ```{r}
-ggplot(data = d.bike, mapping = aes(y = cnt, x = hum)) +
-  geom_point() + xlab("Humidity") + ylab("Count") + geom_smooth()
-```
-
-The smoothing spline shows a possible quadratic effect of hum on cnt. Once again, a GAM is the obvious choice.
-
-```{r}
-gam.hum.1 <- gam(cnt ~ s(hum), data = d.bike)
-summary(gam.hum.1)
+lm.hum.1 <- lm(cnt ~ hum, data = d.bike)
+summary(lm.hum.1)
 ``` 
 
-As the hypothesis test shows, there is strong evidence that hum has an effect on cnt. Furthermore, the R-Squared shows that the model explains 11% of the data. Thus, hum could also be relevant for the final model.
-
-### Windspeed
+According to the hypothesis test, humidity has a negative effect on the number of rented bikes. A higher humidity therefore leads to a lower cnt.
 
 ```{r}
-ggplot(data = d.bike, mapping = aes(y = cnt, x = windspeed)) +
-  geom_point() + xlab("Windspeed") + ylab("Count") + geom_smooth()
+ggplot(data = d.bike, mapping = aes(y = cnt, x = hum)) +
+  geom_point() + xlab("Humidity") + ylab("Count") + geom_abline(intercept=lm.hum.1$coefficients[1], slope=lm.hum.1$coefficients[2], colour="red", size=1)
 ```
 
-The graph shows that windspeed might have a linear effect on cnt. Furthermore the smoothing spline shows that there is very little influence of windspeed, because the curve is almost flat.
-
+### Windspeed
 ```{r}
 lm.windspeed.1 <- lm(cnt ~ windspeed, data = d.bike)
 summary(lm.windspeed.1)
@@ -285,27 +275,32 @@ summary(lm.windspeed.1)
 
 The wind speed has a positive effect on cnt. This is surprising, since the observed data seems to decrease with increasing wind speed. As R-Squared shows, this regression model explains only 0.8% of the data. This indicates that the attribute can be omitted in the final model.
 
+```{r}
+ggplot(data = d.bike, mapping = aes(y = cnt, x = windspeed)) +
+  geom_point() + xlab("Windspeed") + ylab("Count") + geom_abline(intercept=lm.windspeed.1$coefficients[1], slope=lm.windspeed.1$coefficients[2], colour="red", size=1)
+```
+
 ### Casual Users and registered users
 
 ```{r}
-ggplot(data = d.bike, mapping = aes(y = cnt, x = casual)) +
-  geom_point() + xlab("Casual Users") + ylab("Count") + geom_smooth()
-```
-
-```{r}
-gam.casual.1 <- gam(cnt ~ s(casual), data = d.bike)
-summary(gam.casual.1)
+lm.casual.1 <- lm(cnt ~ casual, data = d.bike)
+summary(lm.casual.1)
 ``` 
-
-```{r}
-ggplot(data = d.bike, mapping = aes(y = cnt, x = registered)) +
-  geom_point() + xlab("Registered Users") + ylab("Count") + geom_smooth()
-```
 
 ```{r}
 lm.registered.1 <- lm(cnt ~ registered, data = d.bike)
 summary(lm.registered.1)
 ``` 
+
+```{r}
+ggplot(data = d.bike, mapping = aes(y = cnt, x = casual)) +
+  geom_point() + xlab("Casual Users") + ylab("Count") + geom_abline(intercept=lm.casual.1$coefficients[1], slope=lm.casual.1$coefficients[2], colour="red", size=1)
+```
+
+```{r}
+ggplot(data = d.bike, mapping = aes(y = cnt, x = registered)) +
+  geom_point() + xlab("Registered Users") + ylab("Count")+ geom_abline(intercept=lm.registered.1$coefficients[1], slope=lm.registered.1$coefficients[2], colour="red", size=1)
+```
 
 Both casual and registered users show a positive effect and explain a large part of the data with the model. This suggests that casual and registered users need not be considered separately. Furthermore, casual and registered users are not further distinguished and are therefore not considered in the model.
 
@@ -317,19 +312,12 @@ Both casual and registered users show a positive effect and explain a large part
 In this section, the insights gained from the exploratory data analysis and the consideration of the individual attributes should help to form a hypothesis about what the final model might look like. This hypothesis is the starting point for developing the model.
 
 The explorative data analysis has shown that the attributes season, yr, mnth, hr, weathersit, temp, atemp and hum can probably be considered in the model. From this, the following model can be assumed:
-
-    cnt = season + year + mnth + hr + weathersit + temp + atemp + hum
-    
-Furthermore, explorative data analysis has shown that the numerical predictors temp, atemp and hum probably produce non-linear effects.
+  
+  cnt = season + year + mnth + hr + weathersit + temp + atemp + hum
 
 ### Linear Regression
-```{r}
-lm.bike.1 <- lm(cnt ~ as.factor(season) + as.factor(yr) + as.factor(mnth) + as.factor(hr) + as.factor(weathersit) + temp + atemp + hum, data = d.bike)
-summary(lm.bike.1)
-```
 
 ### Non-linear Regression
-
 
 ### Poisson Regression
 
