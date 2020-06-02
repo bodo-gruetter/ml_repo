@@ -48,21 +48,11 @@ ggplot(data = d.bike, aes(group=weathersit, y = cnt, x = weathersit)) +
 ggplot(data = d.bike, mapping = aes(y = cnt, x = temp)) +
   geom_point()
 
+lm.temp.1 <- lm(cnt ~ temp, data = d.bike)
+summary(lm.temp.1)
+
 qplot(y = cnt, x = temp, data = d.bike, facets = ~ season)
-
-qplot(y = cnt, x = temp, data = d.bike, facets = ~ yr)
-
-qplot(y = cnt, x = temp, data = d.bike, facets = ~ mnth)
-
-qplot(y = cnt, x = temp, data = d.bike, facets = ~ hr)
-
-qplot(y = cnt, x = temp, data = d.bike, facets = ~ holiday)
-
-qplot(y = cnt, x = temp, data = d.bike, facets = ~ weekday)
-
-qplot(y = cnt, x = temp, data = d.bike, facets = ~ workingday)
-
-qplot(y = cnt, x = temp, data = d.bike, facets = ~ weathersit)
++ geom_abline(intercept=lm.temp.1$coefficients[1], slope=lm.temp.1$coefficients[2], colour="red", size=1)
 
 ## Investigating the felt temperature
 ggplot(data = d.bike, mapping = aes(y = cnt, x = atemp)) +
@@ -83,3 +73,36 @@ ggplot(data = d.bike, mapping = aes(y = cnt, x = casual)) +
 ## Investigating the registered users
 ggplot(data = d.bike, mapping = aes(y = cnt, x = registered)) +
   geom_point()
+
+## Investigating Interactions
+
+qplot(y = cnt, x = temp, data = d.bike, facets = ~ season) + geom_smooth()
+
+qplot(y = cnt, x = temp, data = d.bike, facets = ~ yr) + geom_smooth()
+
+qplot(y = cnt, x = temp, data = d.bike, facets = ~ mnth) + geom_smooth()
+
+qplot(y = cnt, x = temp, data = d.bike, facets = ~ hr) + geom_smooth()
+
+qplot(y = cnt, x = temp, data = d.bike, facets = ~ weathersit) + geom_smooth()
+
+qplot(y = cnt, x = atemp, data = d.bike, facets = ~ season) + geom_smooth()
+
+qplot(y = cnt, x = atemp, data = d.bike, facets = ~ yr) + geom_smooth()
+
+qplot(y = cnt, x = atemp, data = d.bike, facets = ~ mnth) + geom_smooth()
+
+qplot(y = cnt, x = atemp, data = d.bike, facets = ~ hr) + geom_smooth()
+
+qplot(y = cnt, x = atemp, data = d.bike, facets = ~ weathersit) + geom_smooth()
+
+qplot(y = cnt, x = hum, data = d.bike, facets = ~ season) + geom_smooth()
+
+qplot(y = cnt, x = hum, data = d.bike, facets = ~ yr) + geom_smooth()
+
+qplot(y = cnt, x = hum, data = d.bike, facets = ~ mnth) + geom_smooth()
+
+qplot(y = cnt, x = hum, data = d.bike, facets = ~ hr) + geom_smooth()
+
+qplot(y = cnt, x = hum, data = d.bike, facets = ~ weathersit) + geom_smooth()
+

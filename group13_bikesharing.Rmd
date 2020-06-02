@@ -1,3 +1,8 @@
+---
+title: "Bikesharing"
+output: html_document
+---
+
 # Predicting the Number of Bike Shares
 In this analysis we would like to predict the count of bike rentals in Washington DC
 
@@ -41,7 +46,7 @@ The dataset contains hourly information about a day and its weather conditions i
 * *cnt*: number of total rentals
 
 ### Feature Selection
-We decide to delete the feature *instant* and *dteday*. *instant* is a record index that has been artificially created. Therefore it will have no relevant effect on *cnt*. *dteday* is the date of the record. With the other attributes as *season*, *yr*, *mnth* and *hr* we will already look at the daily aspect in more detail.
+We decide to delete the feature *instant* and *dteday*. *instant* is a record index that has been artificially created. Therefore it will have no relevant effect on *cnt*. *dteday* is the date of the record. With the other attributes as *season*, *mnth* and *hr* we will already look at the daily aspect in more detail.
 
 ```{r}
 d.bike <- subset(d.bike, select=-c(instant, dteday))
@@ -65,7 +70,6 @@ The record contains no rows with missing data. Now we are ready for the further 
 ```{r}
 set.seed(12)
 nrow(d.bike)*0.7
-
 ```
 
 ## 2. Explorative Data Analysis
@@ -237,6 +241,20 @@ summary(gam.temp.1)
 
 First, a relatively high estimated degree of freedom (edf) of 8,747 is striking. This indicates the high complexity of the relationship. The p-value shows strong evidence that the slope is not 0 and thus there is a correlation between temp and cnt. The adjusted R-Squared shows that 17 percent of the variability is explained by the data. Thus temp could play a role in the final model.
 
+```{r}
+qplot(y = cnt, x = temp, data = d.bike, facets = ~ season) + geom_smooth()
+
+qplot(y = cnt, x = temp, data = d.bike, facets = ~ yr) + geom_smooth()
+
+qplot(y = cnt, x = temp, data = d.bike, facets = ~ mnth) + geom_smooth()
+
+qplot(y = cnt, x = temp, data = d.bike, facets = ~ hr) + geom_smooth()
+
+qplot(y = cnt, x = temp, data = d.bike, facets = ~ weathersit) + geom_smooth()
+``` 
+
+temp shows interaction effects with all of the categorical variables except the yr.
+
 ### Feeling Temperature
 
 ```{r}
@@ -253,6 +271,20 @@ summary(gam.atemp.1)
 
 The edf again shows a more complex relationship between atemp and cnt. The p-value shows strong evidence that the slope is not 0. The R-Squared shows that the model explains 17% of the data. Therefore, atemp could also play a role in the final model.
 
+```{r}
+qplot(y = cnt, x = atemp, data = d.bike, facets = ~ season) + geom_smooth()
+
+qplot(y = cnt, x = atemp, data = d.bike, facets = ~ yr) + geom_smooth()
+
+qplot(y = cnt, x = atemp, data = d.bike, facets = ~ mnth) + geom_smooth()
+
+qplot(y = cnt, x = atemp, data = d.bike, facets = ~ hr) + geom_smooth()
+
+qplot(y = cnt, x = atemp, data = d.bike, facets = ~ weathersit) + geom_smooth()
+``` 
+
+atemp shows interaction effects with all of the categorical variables except the yr.
+
 ### Humidity
 
 ```{r}
@@ -268,6 +300,20 @@ summary(gam.hum.1)
 ``` 
 
 As the hypothesis test shows, there is strong evidence that hum has an effect on cnt. Furthermore, the R-Squared shows that the model explains 11% of the data. Thus, hum could also be relevant for the final model.
+
+```{r}
+qplot(y = cnt, x = hum, data = d.bike, facets = ~ season) + geom_smooth()
+
+qplot(y = cnt, x = hum, data = d.bike, facets = ~ yr) + geom_smooth()
+
+qplot(y = cnt, x = hum, data = d.bike, facets = ~ mnth) + geom_smooth()
+
+qplot(y = cnt, x = hum, data = d.bike, facets = ~ hr) + geom_smooth()
+
+qplot(y = cnt, x = hum, data = d.bike, facets = ~ weathersit) + geom_smooth()
+``` 
+
+hum shows interaction effects with all of the categorical variables.
 
 ### Windspeed
 
@@ -309,22 +355,22 @@ summary(lm.registered.1)
 
 Both casual and registered users show a positive effect and explain a large part of the data with the model. This suggests that casual and registered users need not be considered separately. Furthermore, casual and registered users are not further distinguished and are therefore not considered in the model.
 
-
-## 3. Regression Analysis
-
 ### Model development
 
 In this section, the insights gained from the exploratory data analysis and the consideration of the individual attributes should help to form a hypothesis about what the final model might look like. This hypothesis is the starting point for developing the model.
 
 The explorative data analysis has shown that the attributes season, yr, mnth, hr, weathersit, temp, atemp and hum can probably be considered in the model. From this, the following model can be assumed:
 
-    cnt = season + year + mnth + hr + weathersit + temp + atemp + hum
+    cnt = season + yr + mnth + hr + weathersit + temp + atemp + hum + season:temp + season:atemp + season:hum + yr:hum + mnth:temp + mnth:atemp + mnth:hum + hr:temp + hr:atemp + hr:hum + weathersit:temp + weathersit:atemp + weathersit:hum 
     
 Furthermore, explorative data analysis has shown that the numerical predictors temp, atemp and hum probably produce non-linear effects.
 
+
+## 3. Regression Analysis
+
 ### Linear Regression
 ```{r}
-lm.bike.1 <- lm(cnt ~ as.factor(season) + as.factor(yr) + as.factor(mnth) + as.factor(hr) + as.factor(weathersit) + temp + atemp + hum, data = d.bike)
+lm.bike.1 <- lm(cnt ~ as.factor(season) + as.factor(yr) + as.factor(mnth) + as.factor(hr) + as.factor(weathersit) + temp + atemp + hum + season:temp + season:atemp + season:hum + yr:hum + mnth:temp + mnth:atemp + mnth:hum + hr:temp + hr:atemp + hr:hum + weathersit:temp + weathersit:atemp + weathersit:hum, data = d.bike)
 summary(lm.bike.1)
 ```
 
@@ -341,10 +387,10 @@ summary(poi.bike.1)
 ### Logistic Regression
 
 
-## 4. Trees
+## 4. Trees (Malik)
 
-## 5. Support Vector Machines
+## 5. Support Vector Machines (Bodo)
 
-## 6. Neural Networks
+## 6. Neural Networks (Cengiz)
 
 ## 7. Conclusion (Comparing all models in one table)
