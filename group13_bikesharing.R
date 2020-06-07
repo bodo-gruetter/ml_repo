@@ -2,6 +2,8 @@ library(ggplot2)
 #install.packages("e1071")
 library(e1071)     # for the SVM funtion()
 
+########## Getting Data ##########
+
 d.bike <- read.csv("bikesharing.csv", header=TRUE)
 
 str(d.bike)
@@ -9,6 +11,8 @@ head(d.bike)
 tail(d.bike)
 sum(is.na(d.bike))
 mean(is.na(d.bike))
+
+########## EXPLORATIVE ANALYSIS ##########
 
 ## Investigating the season
 ggplot(data = d.bike, aes(group=season, y = cnt, x = as.factor(season))) +
@@ -108,7 +112,7 @@ qplot(y = cnt, x = hum, data = d.bike, facets = ~ hr) + geom_smooth()
 
 qplot(y = cnt, x = hum, data = d.bike, facets = ~ weathersit) + geom_smooth()
 
-## SVM
+########## SVM ##########
 
 # Linear SVM with cnt and temp
 i <- 720
