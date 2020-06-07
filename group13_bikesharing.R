@@ -9,14 +9,31 @@ rm(list = ls())
 par(mfrow = c(1, 1))
 
 ########## Getting Data ##########
-
+##Load Data
 d.bike <- read.csv("bikesharing.csv", header=TRUE)
+
+##Remove instant and dteday
+d.bike <- subset(d.bike, select=-c(instant, dteday))
 
 str(d.bike)
 head(d.bike)
 tail(d.bike)
 sum(is.na(d.bike))
 mean(is.na(d.bike))
+
+##Creating train and test data set
+# set seed
+set.seed(123)
+
+# create weighted train (75%) and test (25%) set
+d.bike.train.id <- sample(seq_len(nrow(d.bike)),size = floor(0.75*nrow(d.bike)))
+d.bike.train <- d.bike[d.bike.train.id,]
+d.bike.test <- d.bike[-d.bike.train.id,]  
+
+# Check
+nrow(d.bike)
+nrow(d.bike.train)
+nrow(d.bike.test)
 
 ########## EXPLORATIVE ANALYSIS ##########
 
@@ -177,6 +194,8 @@ lm.rmse <- sqrt(mean(lm.bike.1$residuals^2))
 lm.rmse
 
 ##Non-Linear Regression
+gam.bike.0 <- gam(final.model, data = d.bike)
+summary(gam.bike.0)
 gam.bike.1 <- gam(cnt ~ as.factor(season) + as.factor(yr) + as.factor(mnth) + as.factor(hr) + as.factor(weathersit) + s(hum) + s(temp) + s(atemp) + atemp:season + hum:season + hum:yr + atemp:mnth + temp:hr + hum:hr, data = d.bike)
 summary(gam.bike.1)
 
