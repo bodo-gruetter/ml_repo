@@ -2,6 +2,8 @@ library(ggplot2)
 #install.packages("e1071")
 library(e1071)     # for the SVM funtion()
 library(mgcv)
+#install.packages("corrplot")
+library(corrplot)
 
 # clear environment
 rm(list = ls())
@@ -36,6 +38,12 @@ nrow(d.bike.train)
 nrow(d.bike.test)
 
 ########## EXPLORATIVE ANALYSIS ##########
+
+## Investigating the Correlation between all predictors
+predictors = c("season", "yr","mnth","hr","holiday","weekday",
+             "workingday","weathersit","temp","atemp","hum","windspeed", "casual", "registered")
+corrplot(cor(data.matrix(d.bike[predictors])))
+
 
 ## Investigating the season
 ggplot(data = d.bike, aes(group=season, y = cnt, x = as.factor(season))) +
@@ -184,6 +192,9 @@ summary(lm.full.model.1)
 #save starting.model.1 in final model
 final.model <- cnt ~ as.factor(season) + as.factor(yr) + as.factor(mnth) + as.factor(hr) + as.factor(weathersit) + hum + atemp:season + hum:season + hum:yr + atemp:mnth + temp:hr + hum:hr
 
+########## CROSS VALIDATION ##########
+
+
 ########## REGRESSION ANALYSIS ##########
 ##Linear Regression
 lm.bike.1 <- lm(final.model, data = d.bike)
@@ -226,6 +237,7 @@ c.bike <- data.frame(x=d.bike, t=as.factor(as.numeric(i + s * d.bike$temp <= d.b
 ggplot(data = c.bike, mapping = aes(y = x.cnt, x = x.temp,  color=t)) + geom_point() + geom_abline(slope = s, intercept = i, size = 1, alpha = 0.5)
 
 # Creating svm model
+?svm
 svm.bike.1 <- svm(t~x.cnt+x.temp,
            data = c.bike,
            kernel = "linear",
@@ -255,7 +267,7 @@ tune.out <- tune(
 )
 summary(tune.out)
 
-# get the model with pest cost parameter
+# get the model with best cost parameter
 svm.bike.best <- tune.out$best.model
 summary(svm.bike.best)
 plot(svm.bike.best, c.bike, x.cnt~x.temp)
@@ -264,7 +276,51 @@ plot(svm.bike.best, c.bike, x.cnt~x.temp)
 table(predict = predict(svm.bike.best, c.bike),
       truth = c.bike$t)
 
-# Non linear SVM with cnt and temp
+# SVM with model developed
+# Straight forward approach to build 5 classes 0 to 4
+max(d.bike$cnt)
+max(d.bike$cnt)/5
+for(i in 1:nrow(d.bike)){
+  if(d.bike$cnt[i] >= 0 & d.bike$cnt[i] < 196){
+    d.bike$class[i] <- 0
+  } else if (d.bike$cnt[i] >= 196 & d.bike$cnt[i] < 391){
+    d.bike$class[i] <- 1
+  } else if (d.bike$cnt[i] >= 391 & d.bike$cnt[i] < 586){
+    d.bike$class[i] <- 2
+  } else if (d.bike$cnt[i] >= 586 & d.bike$cnt[i] < 781){
+    d.bike$class[i] <- 3
+  } else if (d.bike$cnt[i] >= 781 & d.bike$cnt[i] <= 977){
+    d.bike$class[i] <- 4
+  }
+}
+View(d.bike)
 
+svm.final.model <- as.factor(class) ~ as.factor(season) + as.factor(yr) + as.factor(mnth) + as.factor(hr) + as.factor(weathersit) + hum + atemp:season + hum:season + hum:yr + atemp:mnth + temp:hr + hum:hr
+    
+svm.bike.1 <- svm(svm.final.model,
+                  data = d.bike,
+                  kernel = "radial",
+                  cost = 100,
+                  scale = FALSE,
+)
+summary(svm.bike.1)
 
-# Non linear SVM with developed model
+cost_range <-
+  c(0.1,
+    1,
+    10,
+    100)
+
+# tune.out model
+tune.out <- tune(
+  svm,
+  svm.final.model,
+  data = d.bike,
+  kernel = "radial",
+  ranges = list(cost = cost_range)
+)
+summary(tune.out)
+
+# show if there are any errors in prediction
+table(predict = predict(svm.bike.1, d.bike),
+      truth = d.bike$class)
