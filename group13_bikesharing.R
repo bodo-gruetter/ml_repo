@@ -17,6 +17,7 @@ d.bike <- read.csv("bikesharing.csv", header=TRUE)
 ##Remove instant and dteday
 d.bike <- subset(d.bike, select=-c(instant, dteday))
 
+##Descriptive data analysis
 str(d.bike)
 head(d.bike)
 tail(d.bike)
@@ -227,7 +228,44 @@ poi.rmse
 
 ########## SVM ##########
 
-# Linear SVM with cnt and temp
+########## UPDATING DATASET FOR SVM ##########
+##Remove instant and dteday
+str(d.bike)
+d.bike.new <- subset(d.bike, select=-c(holiday, weekday, workingday, temp, atemp, windspeed, casual, registered))
+str(d.bike.new)
+# build 5 classes 0 to 4 according to cnt
+
+max(d.bike.new$cnt)
+max(d.bike.new$cnt)/5
+for(i in 1:nrow(d.bike)){
+  if(d.bike.new$cnt[i] >= 0 & d.bike.new$cnt[i] < 196){
+    d.bike.new$class[i] <- 0
+  } else if (d.bike.new$cnt[i] >= 196 & d.bike.new$cnt[i] < 391){
+    d.bike.new$class[i] <- 1
+  } else if (d.bike.new$cnt[i] >= 391 & d.bike.new$cnt[i] < 586){
+    d.bike.new$class[i] <- 2
+  } else if (d.bike.new$cnt[i] >= 586 & d.bike.new$cnt[i] < 781){
+    d.bike.new$class[i] <- 3
+  } else if (d.bike.new$cnt[i] >= 781 & d.bike.new$cnt[i] <= 977){
+    d.bike.new$class[i] <- 4
+  }
+}
+View(d.bike.new)
+# set seed
+set.seed(123)
+
+# create weighted train (75%) and test (25%) set
+d.bike.train.id <- sample(seq_len(nrow(d.bike.new)),size = floor(0.75*nrow(d.bike.new)))
+d.bike.train.new <- d.bike.new[d.bike.train.id,]
+d.bike.test.new <- d.bike.new[-d.bike.train.id,]  
+
+# Check
+nrow(d.bike.new)
+nrow(d.bike.train.new)
+nrow(d.bike.test.new)
+
+
+###### Linear SVM with cnt and temp
 i <- 720
 s <- -900
 ggplot(data = d.bike, mapping = aes(y = cnt, x = temp)) + geom_point() + geom_abline(intercept = i, slope = s)
@@ -276,51 +314,31 @@ plot(svm.bike.best, c.bike, x.cnt~x.temp)
 table(predict = predict(svm.bike.best, c.bike),
       truth = c.bike$t)
 
-# SVM with model developed
-# Straight forward approach to build 5 classes 0 to 4
-max(d.bike$cnt)
-max(d.bike$cnt)/5
-for(i in 1:nrow(d.bike)){
-  if(d.bike$cnt[i] >= 0 & d.bike$cnt[i] < 196){
-    d.bike$class[i] <- 0
-  } else if (d.bike$cnt[i] >= 196 & d.bike$cnt[i] < 391){
-    d.bike$class[i] <- 1
-  } else if (d.bike$cnt[i] >= 391 & d.bike$cnt[i] < 586){
-    d.bike$class[i] <- 2
-  } else if (d.bike$cnt[i] >= 586 & d.bike$cnt[i] < 781){
-    d.bike$class[i] <- 3
-  } else if (d.bike$cnt[i] >= 781 & d.bike$cnt[i] <= 977){
-    d.bike$class[i] <- 4
-  }
-}
-View(d.bike)
+####### SVM with model developed
 
-svm.final.model <- as.factor(class) ~ as.factor(season) + as.factor(yr) + as.factor(mnth) + as.factor(hr) + as.factor(weathersit) + hum + atemp:season + hum:season + hum:yr + atemp:mnth + temp:hr + hum:hr
-    
+svm.final.model <- as.factor(class) ~ as.factor(season) + as.factor(yr) + as.factor(mnth) + as.factor(hr) + as.factor(weathersit) + cnt
+
+#linear kernel
 svm.bike.1 <- svm(svm.final.model,
-                  data = d.bike,
-                  kernel = "radial",
-                  cost = 100,
+                  data = d.bike.train.new,
+                  kernel = "linear",
+                  cost = 0.5,
                   scale = FALSE,
 )
 summary(svm.bike.1)
 
-cost_range <-
-  c(0.1,
-    1,
-    10,
-    100)
+# calculate performance of svm on d.bike.train.new
+predict.svm.bike.train <- predict(svm.bike.1, d.bike.train.new)
+table(predict.svm.bike.train, d.bike.train.new$class)
 
-# tune.out model
-tune.out <- tune(
-  svm,
-  svm.final.model,
-  data = d.bike,
-  kernel = "radial",
-  ranges = list(cost = cost_range)
-)
-summary(tune.out)
+corrects=sum(predict.svm.bike.train==d.bike.train.new$class)
+errors=sum(predict.svm.bike.train!=d.bike.train.new$class)
+(performance_train=corrects/(corrects+errors))
 
-# show if there are any errors in prediction
-table(predict = predict(svm.bike.1, d.bike),
-      truth = d.bike$class)
+# calculate performance of svm on d.bike.test.new
+predict.svm.bike.test <- predict(svm.bike.1, d.bike.test.new)
+table(predict.svm.bike.test, d.bike.test.new$class)
+
+corrects=sum(predict.svm.bike.test==d.bike.test.new$class)
+errors=sum(predict.svm.bike.test!=d.bike.test.new$class)
+(performance_train=corrects/(corrects+errors))
