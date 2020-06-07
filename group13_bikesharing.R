@@ -257,12 +257,15 @@ set.seed(123)
 # create weighted train (75%) and test (25%) set
 d.bike.train.id <- sample(seq_len(nrow(d.bike.new)),size = floor(0.75*nrow(d.bike.new)))
 d.bike.train.new <- d.bike.new[d.bike.train.id,]
-d.bike.test.new <- d.bike.new[-d.bike.train.id,]  
+d.bike.test.new <- d.bike.new[-d.bike.train.id,]
 
 # Check
 nrow(d.bike.new)
+str(d.bike.new)
 nrow(d.bike.train.new)
+str(d.bike.train.new)
 nrow(d.bike.test.new)
+str(d.bike.test.new)
 
 
 ###### Linear SVM with cnt and temp
@@ -315,30 +318,71 @@ table(predict = predict(svm.bike.best, c.bike),
       truth = c.bike$t)
 
 ####### SVM with model developed
-
-svm.final.model <- as.factor(class) ~ as.factor(season) + as.factor(yr) + as.factor(mnth) + as.factor(hr) + as.factor(weathersit) + cnt
+d.bike.train.svm <- data.frame(x=subset(d.bike.train.new, select=-c(class)), y=as.factor(d.bike.train.new$class))
+d.bike.test.svm <- data.frame(x=subset(d.bike.test.new, select=-c(class)), y=as.factor(d.bike.test.new$class))
 
 #linear kernel
-svm.bike.1 <- svm(svm.final.model,
-                  data = d.bike.train.new,
+svm.bike.1 <- svm(y ~ .,
+                  data = d.bike.train.svm,
                   kernel = "linear",
-                  cost = 0.5,
+                  cost = 0.01,
                   scale = FALSE,
 )
 summary(svm.bike.1)
 
-# calculate performance of svm on d.bike.train.new
-predict.svm.bike.train <- predict(svm.bike.1, d.bike.train.new)
-table(predict.svm.bike.train, d.bike.train.new$class)
+# calculate performance of svm.bike.1 on d.bike.train.svm
+predict.svm.bike.1.train <- predict(svm.bike.1, d.bike.train.svm)
+table(predict.svm.bike.1.train, d.bike.train.svm$y)
 
-corrects=sum(predict.svm.bike.train==d.bike.train.new$class)
-errors=sum(predict.svm.bike.train!=d.bike.train.new$class)
+corrects=sum(predict.svm.bike.1.train=as.numeric(d.bike.train.svm$y))
+errors=sum(predict.svm.bike.1.train!=as.numeric(d.bike.train.svm$y))
 (performance_train=corrects/(corrects+errors))
 
-# calculate performance of svm on d.bike.test.new
-predict.svm.bike.test <- predict(svm.bike.1, d.bike.test.new)
-table(predict.svm.bike.test, d.bike.test.new$class)
+# calculate performance of svm.bike.1 on d.bike.test.svm
+predict.svm.bike.1.test <- predict(svm.bike.1, d.bike.test.svm)
+table(predict.svm.bike.1.test, d.bike.test.svm$y)
 
-corrects=sum(predict.svm.bike.test==d.bike.test.new$class)
-errors=sum(predict.svm.bike.test!=d.bike.test.new$class)
+corrects=sum(predict.svm.bike.1.test=as.numeric(d.bike.test.svm$y))
+errors=sum(predict.svm.bike.1.test!=as.numeric(d.bike.test.svm$y))
+(performance_test=corrects/(corrects+errors))
+
+# Build a cost range for tuning
+cost_range <-
+  c(0.01,
+    0.1,
+    1,
+    5,
+    10,
+    100,
+    1000)
+
+# tune.out model
+tune.out <- tune(
+  svm,
+  y~.,
+  data = d.bike.train.svm,
+  kernel = "linear",
+  ranges = list(cost = cost_range),
+  scale = FALSE
+  )
+summary(tune.out)
+
+# fit the best model
+svm.bike.best <- tune.out$best.model
+summary(svm.bike.best)
+
+# calculate performance of svm.bike.best on d.bike.train.svm
+predict.svm.bike.best.train <- predict(svm.bike.best, d.bike.train.svm)
+table(predict.svm.bike.best.train, d.bike.train.svm$y)
+
+corrects=sum(predict.svm.bike.best.train==d.bike.train.svm$y)
+errors=sum(predict.svm.bike.best.train!=d.bike.train.svm$y)
 (performance_train=corrects/(corrects+errors))
+
+# calculate performance of svm.bike.best on d.bike.test.svm
+predict.svm.bike.best.test <- predict(svm.bike.best, d.bike.test.svm)
+table(predict.svm.bike.best.test, d.bike.test.svm$y)
+
+corrects=sum(predict.svm.bike.best.test==d.bike.test.svm$y)
+errors=sum(predict.svm.bike.best.test!=d.bike.test.svm$y)
+(performance_test=corrects/(corrects+errors))
