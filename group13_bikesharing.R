@@ -1,3 +1,11 @@
+#####################################
+#Bodo Gruetter, bodojeremy.gruetter@stud.hslu.ch
+#Necati Van, necati.vanr@stud.hslu.ch
+#Cengiz Cetinkaya, cengiz.cetinkaya@stud.hslu.ch
+#Malik Sogukoglu, malik.sogukoglu@stud.hslu.ch
+#Group 13
+
+########## Import Packages ##########
 library(ggplot2)
 #install.packages("e1071")
 library(e1071)     # for the SVM funtion()
