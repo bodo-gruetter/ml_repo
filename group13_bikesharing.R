@@ -18,6 +18,8 @@ library(mgcv)
 library(boot)
 
 ########## Prepare Environment ##########
+# Set seed for reproducability
+set.seed(123)
 # clear environment
 rm(list = ls())
 # set plotting window to default
