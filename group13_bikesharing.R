@@ -15,6 +15,7 @@ library(corrplot)
 #install.packages("tree")
 library(tree)
 library(mgcv)
+library(boot)
 
 ########## Prepare Environment ##########
 # clear environment
@@ -62,6 +63,10 @@ ggplot(data = d.bike, aes(x=cnt)) +
   geom_histogram(bins=30, colour="black", ylab="Frequency") + xlab("Count") + ylab("Frequency")
 mean(d.bike$cnt)
 sd(d.bike$cnt)
+
+d.bike$log.cnt <- log(d.bike$cnt)
+ggplot(data = d.bike, aes(x=log.cnt)) +
+  geom_histogram(bins=30, colour="black", ylab="Frequency") + xlab("Count") + ylab("Frequency")
 
 ## Investigating the season
 ggplot(data = d.bike, aes(group=season, y = cnt, x = as.factor(season))) +
@@ -237,12 +242,12 @@ lm.starting.model.1 <- update(lm.starting.model.1, . ~ . - weathersit:hum)
 summary(lm.starting.model.1)
 
 #Drop atemp
-lm.starting.model.1 <- update(lm.starting.model.1, . ~ . - atemp)
-summary(lm.starting.model.1)
+#lm.starting.model.1 <- update(lm.starting.model.1, . ~ . - atemp)
+#summary(lm.starting.model.1)
 
 #Drop temp
-lm.starting.model.1 <- update(lm.starting.model.1, . ~ . - temp)
-summary(lm.starting.model.1)
+#lm.starting.model.1 <- update(lm.starting.model.1, . ~ . - temp)
+#summary(lm.starting.model.1)
 
 #Comparison of lm.starting.model.1 and model with all predictors
 lm.full.model.1 <- lm(full.model.1, data = d.bike)
@@ -250,7 +255,7 @@ summary(lm.starting.model.1)
 summary(lm.full.model.1)
 
 #save starting.model.1 in final model
-final.model <- cnt ~ as.factor(season) + as.factor(yr) + as.factor(mnth) + as.factor(hr) + as.factor(weathersit) + hum + atemp:season + hum:season + hum:yr + atemp:mnth + temp:hr + hum:hr
+final.model <- cnt ~ as.factor(season) + as.factor(yr) + as.factor(mnth) + as.factor(hr) + as.factor(weathersit) + temp + atemp + hum + atemp:season + hum:season + hum:yr + atemp:mnth + temp:hr + hum:hr
 
 ########## CROSS VALIDATION ##########
 

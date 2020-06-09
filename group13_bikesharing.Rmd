@@ -4,7 +4,18 @@ output: html_document
 ---
 
 # Predicting the Number of Bike Shares
-In this analysis we would like to predict the count of bike rentals in Washington DC
+In this analysis we would like to predict the count of bike rentals in Washington DC with a regression analysis, Decision Trees, Support Vector Machines (SVMs) and Neural Networks (NN).
+
+## 0. Import Packages
+Before the project starts, all required packages are imported.
+```{r, message=FALSE}
+library(ggplot2)
+library(e1071)
+library(mgcv)
+library(corrplot)
+library(tree)
+library(mgcv)
+```
 
 ## 1. Getting Data
 ### Data source
@@ -17,7 +28,7 @@ d.bike <- read.csv("bikesharing.csv", header=TRUE)
 ```
 
 ### Describing the dataset
-```{r}
+```{r include=FALSE}
 str(d.bike)
 ```
 
@@ -45,8 +56,18 @@ The dataset contains hourly information about a day and its weather conditions i
 * *registered*: number of registered users (eg. workers that use bikes daily)
 * *cnt*: number of total rentals
 
+### Investigating the correlation between all predictors
+In order to make a valid feature selection in the next step, we now want to investigate the correlation between the predictors. The so-called corrplot offers a simple and clear display. This shows a correlation matrix. Correlations are represented by dots. The exact value can be read off the scale.
+```{r}
+predictors = c("dteday", "season", "yr","mnth","hr","holiday","weekday",
+             "workingday","weathersit","temp","atemp","hum","windspeed", "casual", "registered")
+corrplot(cor(data.matrix(d.bike[predictors])))
+```
+
+As the corrplot shows, dteday correlates strongly with the predictor yr. Furthermore it can be seen that there is a correlation between dteday and season as well as mnth. There is also a relatively strong correlation between month and season.The strongest correlation of almost 1 shows temp and atemp.
+
 ### Feature Selection
-We decide to delete the feature *instant* and *dteday*. *instant* is a record index that has been artificially created. Therefore it will have no relevant effect on *cnt*. *dteday* is the date of the record. With the other attributes as *season*, *mnth* and *hr* we will already look at the daily aspect in more detail.
+We decide to delete the feature *instant* and *dteday*. *instant* is a record index that has been artificially created. Therefore it will have no relevant effect on *cnt*. *dteday* is the date of the record. It correlates with the three other attributes *season*, *yr* and *mnth*. The features season and mnth as well as temp and atem will be kept for now.
 
 ```{r}
 d.bike <- subset(d.bike, select=-c(instant, dteday))
@@ -64,21 +85,20 @@ sum(is.na(d.bike))
 mean(is.na(d.bike))
 ```
 
-The record contains no rows with missing data. Now we are ready for the further analysis steps.
+The record contains no rows with missing data.
 
 ### Creating training and test data set
+At this point the data set d.bike is divided into training and test set. The training set should consist of 75% of the data and the test set of 25% of the data.
 ```{r}
-set.seed(12)
-nrow(d.bike)*0.7
+d.bike.train.id <- sample(seq_len(nrow(d.bike)),size = floor(0.75*nrow(d.bike)))
+d.bike.train <- d.bike[d.bike.train.id,]
+d.bike.test <- d.bike[-d.bike.train.id,]
 ```
 
 ## 2. Explorative Data Analysis
 In this section each attribute is considered to make certain assumptions. Different statistical diagrams are used for this purpose. The effects of the different attributes on cnt are tested using ANOVA for categorical attributes and a linear regression model for numerical values. The aim of this explorative data analysis is to get a starting point for the model building.
 
-Because ggplot allows elegant data visualization with the same syntax for different types of data models, we decide to use ggplot exclusively for graphical representations as far as possible. Therefore we import ggplot2.
-```{r}
-library(ggplot2)
-```
+To keep our documentation clear, not all graphical analyses are shown. For example, interactions between predictors are not shown in this document but only described. At these points, references are made to the R-file.
 
 ### Count
 In the very first step we would like to look at the distribution of the response variable count. For this purpose we create a histogram.
@@ -88,7 +108,7 @@ ggplot(data = d.bike, aes(x=cnt)) +
 mean(d.bike$cnt)
 sd(d.bike$cnt)
 ```
-As we can see, this is a right skewed distribution. So in most hours - the number of bike rentals are hourly observations - between 0 and 30 bikes (the most left bar) are rented.
+As we can see, this is a right skewed gamma distribution. So in most hours - the number of bike rentals are hourly observations - between 0 and 30 bikes (the most left bar) are rented.
 
 ### Season
 If we want to visualize the effect of the *season* as a categorical variable on the number of bike rentals it is a good idea to use a box plot.
@@ -239,21 +259,7 @@ gam.temp.1 <- gam(cnt ~ s(temp), data = d.bike)
 summary(gam.temp.1)
 ``` 
 
-First, a relatively high estimated degree of freedom (edf) of 8,747 is striking. This indicates the high complexity of the relationship. The p-value shows strong evidence that the slope is not 0 and thus there is a correlation between temp and cnt. The adjusted R-Squared shows that 17 percent of the variability is explained by the data. Thus temp could play a role in the final model.
-
-```{r}
-qplot(y = cnt, x = temp, data = d.bike, facets = ~ season) + geom_smooth()
-
-qplot(y = cnt, x = temp, data = d.bike, facets = ~ yr) + geom_smooth()
-
-qplot(y = cnt, x = temp, data = d.bike, facets = ~ mnth) + geom_smooth()
-
-qplot(y = cnt, x = temp, data = d.bike, facets = ~ hr) + geom_smooth()
-
-qplot(y = cnt, x = temp, data = d.bike, facets = ~ weathersit) + geom_smooth()
-``` 
-
-temp shows interaction effects with all of the categorical variables except the yr.
+First, a relatively high estimated degree of freedom (edf) of 8,747 is striking. This indicates the high complexity of the relationship. The p-value shows strong evidence that the slope is not 0 and thus there is a correlation between temp and cnt. The adjusted R-Squared shows that 17 percent of the variability is explained by the data. Thus temp could play a role in the final model. temp shows interaction effects with all of the categorical variables except the yr (see line 142, group13_bikesharing.R).
 
 ### Feeling Temperature
 
@@ -269,21 +275,7 @@ gam.atemp.1 <- gam(cnt ~ s(atemp), data = d.bike)
 summary(gam.atemp.1)
 ``` 
 
-The edf again shows a more complex relationship between atemp and cnt. The p-value shows strong evidence that the slope is not 0. The R-Squared shows that the model explains 17% of the data. Therefore, atemp could also play a role in the final model.
-
-```{r}
-qplot(y = cnt, x = atemp, data = d.bike, facets = ~ season) + geom_smooth()
-
-qplot(y = cnt, x = atemp, data = d.bike, facets = ~ yr) + geom_smooth()
-
-qplot(y = cnt, x = atemp, data = d.bike, facets = ~ mnth) + geom_smooth()
-
-qplot(y = cnt, x = atemp, data = d.bike, facets = ~ hr) + geom_smooth()
-
-qplot(y = cnt, x = atemp, data = d.bike, facets = ~ weathersit) + geom_smooth()
-``` 
-
-atemp shows interaction effects with all of the categorical variables except the yr.
+The edf again shows a more complex relationship between atemp and cnt. The p-value shows strong evidence that the slope is not 0. The R-Squared shows that the model explains 17% of the data. Therefore, atemp could also play a role in the final model. atemp shows interaction effects with all of the categorical variables except the yr (see line 160, group13_bikesharing.R).
 
 ### Humidity
 
@@ -299,21 +291,7 @@ gam.hum.1 <- gam(cnt ~ s(hum), data = d.bike)
 summary(gam.hum.1)
 ``` 
 
-As the hypothesis test shows, there is strong evidence that hum has an effect on cnt. Furthermore, the R-Squared shows that the model explains 11% of the data. Thus, hum could also be relevant for the final model.
-
-```{r}
-qplot(y = cnt, x = hum, data = d.bike, facets = ~ season) + geom_smooth()
-
-qplot(y = cnt, x = hum, data = d.bike, facets = ~ yr) + geom_smooth()
-
-qplot(y = cnt, x = hum, data = d.bike, facets = ~ mnth) + geom_smooth()
-
-qplot(y = cnt, x = hum, data = d.bike, facets = ~ hr) + geom_smooth()
-
-qplot(y = cnt, x = hum, data = d.bike, facets = ~ weathersit) + geom_smooth()
-``` 
-
-hum shows interaction effects with all of the categorical variables.
+As the hypothesis test shows, there is strong evidence that hum has an effect on cnt. Furthermore, the R-Squared shows that the model explains 11% of the data. Thus, hum could also be relevant for the final model. hum shows interaction effects with all of the categorical variables (see line 178, group13_bikesharing.R).
 
 ### Windspeed
 
@@ -363,8 +341,53 @@ The explorative data analysis has shown that the attributes season, yr, mnth, hr
 
     cnt = season + yr + mnth + hr + weathersit + temp + atemp + hum + season:temp + season:atemp + season:hum + yr:hum + mnth:temp + mnth:atemp + mnth:hum + hr:temp + hr:atemp + hr:hum + weathersit:temp + weathersit:atemp + weathersit:hum 
     
-Furthermore, explorative data analysis has shown that the numerical predictors temp, atemp and hum probably produce non-linear effects.
+First two models are initialized. The full model with all predictors, the starting model with all interactions and the starting model without considering the interactions.
 
+```{r}
+full.model.1 <- cnt ~ as.factor(season) + as.factor(yr) + as.factor(mnth) + as.factor(hr) + as.factor(holiday) + as.factor(weekday) + as.factor(workingday) + as.factor(weathersit) + temp + atemp + hum + windspeed + casual + registered
+
+starting.model.1 <- cnt ~ as.factor(season) + as.factor(yr) + as.factor(mnth) + as.factor(hr) + as.factor(weathersit) + temp + atemp + hum + season:temp + season:atemp + season:hum + yr:hum + mnth:temp + mnth:atemp + mnth:hum + hr:temp + hr:atemp + hr:hum + weathersit:temp + weathersit:atemp + weathersit:hum
+
+starting.model.2 <- cnt ~ as.factor(season) + as.factor(yr) + as.factor(mnth) + as.factor(hr) + as.factor(weathersit) + temp + atemp + hum
+```
+
+To find out which of the two starting models fits the data better, the results of the two models are first compared.
+
+```{r}
+lm.starting.model.1 <- lm(starting.model.1, data = d.bike)
+lm.starting.model.2 <- lm(starting.model.2, data = d.bike)
+summary(lm.starting.model.1)
+summary(lm.starting.model.2)
+```
+
+If only the adjusted R-Squared is considered at this point, it is shown that the starting.model.1 with a value of 0.7093 explains the variability of the data better than the starting.model.2 with a value of 0.6838. Thus we take the starting.model.1 as a starting point for the model development.
+
+If now the p-value of the individual predictors and the interaction relationships in the output of starting.model.1 are considered, it becomes clear that certain attributes have no significant effect on cnt. The interaction relationships weathersit:atemp, weathersit:temp, hr:atemp and mnth:temp are deleted from the model.
+
+```{r}
+lm.starting.model.1 <- update(lm.starting.model.1, . ~ . - weathersit:atemp)
+lm.starting.model.1 <- update(lm.starting.model.1, . ~ . - weathersit:temp)
+lm.starting.model.1 <- update(lm.starting.model.1, . ~ . - hr:atemp)
+lm.starting.model.1 <- update(lm.starting.model.1, . ~ . - mnth:temp)
+summary(lm.starting.model.1)
+```
+
+In the second iteration the interaction relations and predictors with a weak and a medium effect are removed from the model. These are: mnth:hum, season:temp and weathersit:atemp.
+
+```{r}
+lm.starting.model.1 <- update(lm.starting.model.1, . ~ . - mnth:hum)
+lm.starting.model.1 <- update(lm.starting.model.1, . ~ . - season:temp)
+lm.starting.model.1 <- update(lm.starting.model.1, . ~ . - weathersit:hum)
+summary(lm.starting.model.1)
+```
+
+Now all interactions with weak and medium effect are removed from the model. atemp also shows a medium effect. Since it is present in certain interactions with strong effect, atemp is retained. The adapted R-Squared has only been reduced by 0.0003 points due to the adjustments. The final model now has an adjusted R-Squared of 0.709, which explains about 70% of the data. The final model now looks as follows:
+
+    cnt = season + yr + mnth + hr + weathersit + temp + atemp + hum + season:atemp + season:hum + yr:hum + mnth:atemp + hr:temp + hr:hum
+
+```{r include=FALSE}
+final.model <- cnt ~ as.factor(season) + as.factor(yr) + as.factor(mnth) + as.factor(hr) + as.factor(weathersit) + temp + atemp + hum + atemp:season + hum:season + hum:yr + atemp:mnth + temp:hr + hum:hr
+```
 
 ## 3. Regression Analysis
 
@@ -383,9 +406,6 @@ summary(lm.bike.1)
 poi.bike.1 <- glm(cnt ~ as.factor(season) + as.factor(yr) + as.factor(mnth) + as.factor(hr) + as.factor(weathersit) + temp + atemp + hum, family = "poisson", data = d.bike)
 summary(poi.bike.1)
 ```
-
-### Logistic Regression
-
 
 ## 4. Trees (Malik)
 
