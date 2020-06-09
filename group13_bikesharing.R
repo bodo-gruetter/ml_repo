@@ -305,7 +305,54 @@ summary(lm.starting.model.4)$adj.r.squared
 summary(lm.full.model.1)$adj.r.squared
 summary(lm.final.model.1)$adj.r.squared
 
+for(i in 1:10^2){
+  d.bike.train.id <- sample(seq_len(nrow(d.bike)),size = floor(0.75*nrow(d.bike)))
+  d.bike.train <- d.bike[d.bike.train.id,]
+  d.bike.test <- d.bike[-d.bike.train.id,]
+  
+  #predict data with starting model 1
+  lm.starting.model.1.train <- lm(starting.model.1, data = d.bike.train)
+  predicted.starting.model.1.test <- predict(lm.starting.model.1.train,
+                                             newdata = d.bike.test)
+  r.squared.starting.model.1 <- cor(predicted.starting.model.1.test, d.bike.test$cnt)^2
+  
+  #predict data with starting model 2
+  lm.starting.model.2.train <- lm(starting.model.2, data = d.bike.train)
+  predicted.starting.model.2.test <- predict(lm.starting.model.2.train,
+                                             newdata = d.bike.test)
+  r.squared.starting.model.2 <- cor(predicted.starting.model.2.test, d.bike.test$cnt)^2
+  
+  #predict data with starting model 3
+  lm.starting.model.3.train <- lm(starting.model.3, data = d.bike.train)
+  predicted.starting.model.3.test <- predict(lm.starting.model.3.train,
+                                             newdata = d.bike.test)
+  r.squared.starting.model.3 <- cor(predicted.starting.model.3.test, d.bike.test$cnt)^2
+  
+  #predict data with starting model 4
+  lm.starting.model.4.train <- lm(starting.model.4, data = d.bike.train)
+  predicted.starting.model.4.test <- predict(lm.starting.model.4.train,
+                                             newdata = d.bike.test)
+  r.squared.starting.model.4 <- cor(predicted.starting.model.4.test, d.bike.test$cnt)^2
+  
+  #predict data with full model
+  lm.full.model.train <- lm(full.model.1, data = d.bike.train)
+  predicted.full.model.test <- predict(lm.full.model.train,
+                                       newdata = d.bike.test)
+  r.squared.full.model <- cor(predicted.full.model.test, d.bike.test$cnt)^2
+  
+  #predict data with final model
+  lm.final.model.train <- lm(final.model.1, data = d.bike.train)
+  predicted.final.model.test <- predict(lm.final.model.train,
+                                        newdata = d.bike.test)
+  r.squared.final.model <- cor(predicted.final.model.test, d.bike.test$cnt)^2
+}
 
+mean(r.squared.starting.model.1)
+mean(r.squared.starting.model.2)
+mean(r.squared.starting.model.3)
+mean(r.squared.starting.model.4)
+mean(r.squared.full.model)
+mean(r.squared.final.model)
 
 ########## REGRESSION ANALYSIS ##########
 ##Linear Regression
