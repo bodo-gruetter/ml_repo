@@ -563,6 +563,15 @@ mean(r.squared.poi.bike.1)
 The result is quite close. But the best result is achieved by the poisson regressive model with an average R-Squared.
 
 ## 4. Trees
+Count values are not bell-shaped distributed
+```{r}
+hist(d.bike.train.new$cnt)
+```
+
+Only the variables "hr", "yr" and "season" are used to construct the tree. There are only 11 nodes
+```{r}
+summary(tree.example)
+```
 
 ## 5. Support Vector Machines
 The fifth chapter deals with the classification of data using Support Vector Machines (SVM). Two SVMs are trained and tested. In the first case, the data is classified into two classes using SVM with two predictors. In the second case, the data is classified in five classes using the final model.

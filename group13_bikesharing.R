@@ -463,10 +463,98 @@ str(d.bike.test.new)
 
 
 ########## Decision Trees ##########
-#Classifaction / Regression Tree
-tree.example <- tree(cnt ~ .-class, data = d.bike.train.new)
-plot(tree.example)
-text(tree.example, cex=0.75)
+#Classifaction 
+
+
+#SET 2
+# let's predict the categorical variable "cnt" (--> factor)
+table(d.bike.train.new$cnt) #Categorical variable --> classification tree
+#train data comes in
+tree.classification.bike <- tree(cnt ~ .-class, data = d.bike.train.new, subset=train) 
+
+summary(tree.classification.bike)
+# Output:
+#   - There are 11 terminal nodes (leaves) of the tree.
+#   - Here "residual mean deviance" is just mean squared error: we have an RMS error of 0.66 and an misclassification rate of 15%.
+
+plot(tree.classification.bike)
+text(tree.classification.bike, pretty=1, cex=0.75)
+
+#let's do some predictions, on the data already used for the training --> training error
+tree.classification.bike <- tree(as.factor(cnt) ~ .-class, data = d.bike.train.new, subset=train) 
+tree.classification.bike.pred <- predict(tree.classification.bike, d.bike.train.new, type="class")
+
+########################## Regression tree analysis starts #############
+#classification did not work because at most 32 levels are possible. cnt has more than 1000 levels
+#instead regression tree is to be used
+tree.classification.bike <- tree(cnt ~ .-class, data = d.bike.train.new, subset=train) 
+tree.regression.bike.pred <- predict(tree.classification.bike, d.bike.train.new, type="vector")
+
+# compare predictions of regression tree with true values (visually)
+plot(tree.regression.bike.pred,d.bike.train.new$cnt)
+abline (0 ,1) # compare with the function f(x)=x (intercept 0, slope 1)
+
+error <- tree.regression.bike.pred-d.bike.train.new$cnt
+element_ID <- 1:length(error)
+plot(element_ID,error)
+title(main="Analysis of the residuals")
+abline(0 ,0, lwd=5,lty="dotted")
+abline(1.66 ,0, lwd=2, col="red", lty="dotted")
+abline(-1.66 ,0, lwd=2, col="red", lty="dotted")
+
+library(tidyverse)
+error_dataframe <- tibble(element_ID,error)
+ggplot(data=error_dataframe) + geom_boxplot(aes(y=error))
+hist(error)
+head(d.bike.train.new[7])
+(RSS <- sum((d.bike.train.new[7]-tree.regression.bike.pred)^2))
+(MSE <- RSS/length(tree.regression.bike.pred))
+(MSE <- mean(((d.bike.train.new[7]-tree.regression.bike.pred)^2)$cnt,na.rm = TRUE)) # MSE = 12448.83
+(deviation <- sqrt(MSE)) # square root of the MSE = 1.65993 (in thousand of units)
+# average error on each estimation : within about 1660 units sold from the true median
+plot(element_ID,error)
+title(main="Analysis of the residuals (with average)")
+abline(0 ,0, lwd=3,lty="dotted")
+abline(1.66 ,0, lwd=2, col="red", lty="longdash")
+abline(-1.66 ,0, lwd=2, col="red", lty="longdash")
+
+#let's add a manual split in train/test for the dataset (70/30)
+#this will show the overfitting effect: very evident in fully growt (unpruned) tree
+ratio <- 0.7
+total <- nrow(d.bike.train.new)
+
+train <- sample(1:total, as.integer(total * ratio))
+
+
+tree.regression.bike.2 <- tree(cnt ~ .-class, data = d.bike.train.new, subset=train)
+plot(tree.regression.bike.2)
+text(tree.regression.bike.2, pretty=1, cex=0.75)
+partition.tree(tree.regression.bike.2)
+
+tree.regression.bike.2.pred <- predict(tree.regression.bike.2, d.bike.test.new, type="vector")
+# --> for documentation, use the predict.tree help (from the tree package) --> help(predict.tree)
+
+#let's check the cumulated squared error --> RSS
+(RSS.2.in <- mean(((d.bike.train.new[7]-predict(tree.regression.bike.2, d.bike.train.new, type="vector"))^2)$cnt))
+(RSS.2 <- mean(((d.bike.test.new[7]-tree.regression.bike.2.pred)^2)$cnt))
+
+errors.2.in <- predict(tree.regression.bike.2, d.bike.train.new, type="vector")-d.bike.train.new$cnt
+#element.2.in <- 1:length(errors.2.in)
+element.2.in <- as.integer(names(errors.2.in))
+errors.2.in_dataframe <- tibble(element.2.in,errors.2.in,"TRAIN")
+colnames(errors.2.in_dataframe) <- c('ID','error','type')
+errors.2 <- predict(tree.regression.bike.2, d.bike.test.new, type="vector")-d.bike.test.new$cnt
+#element.2 <- 1:length(errors.2)
+element.2 <- as.integer(names(errors.2))
+errors.2.out_dataframe <- tibble(element.2,errors.2,"TEST")
+colnames(errors.2.out_dataframe) <- c('ID','error','type')
+
+errors.2_dataframe <- bind_rows(errors.2.in_dataframe,errors.2.out_dataframe) 
+errors.2_dataframe <- arrange(errors.2_dataframe, ID)
+
+ggplot(data = errors.2_dataframe, mapping = aes(x = ID,y = error, color = type)) + 
+  geom_point() + geom_boxplot(alpha = 0.5)
+
 
 #Pruning
 
