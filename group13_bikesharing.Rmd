@@ -341,7 +341,7 @@ The explorative data analysis has shown that the attributes season, yr, mnth, hr
 
     cnt = season + yr + mnth + hr + weathersit + temp + atemp + hum + season:temp + season:atemp + season:hum + yr:hum + mnth:temp + mnth:atemp + mnth:hum + hr:temp + hr:atemp + hr:hum + weathersit:temp + weathersit:atemp + weathersit:hum 
     
-First two models are initialized. The full model with all predictors, the starting model with all interactions and the starting model without considering the interactions.
+First five models are initialized. The full model with all predictors, the starting model with all interactions, the starting model without considering the interactions, the starting model without considering the polynomial effect and the starting model without considering polynomial and interaction effects.
 
 ```{r}
 full.model.1 <- cnt ~ as.factor(season) + as.factor(yr) + as.factor(mnth) + as.factor(hr) + as.factor(holiday) + as.factor(weekday) + as.factor(workingday) + as.factor(weathersit) + temp + atemp + hum + windspeed + casual + registered
@@ -349,6 +349,11 @@ full.model.1 <- cnt ~ as.factor(season) + as.factor(yr) + as.factor(mnth) + as.f
 starting.model.1 <- cnt ~ as.factor(season) + as.factor(yr) + as.factor(mnth) + as.factor(hr) + as.factor(weathersit) + temp + atemp + hum + season:temp + season:atemp + season:hum + yr:hum + mnth:temp + mnth:atemp + mnth:hum + hr:temp + hr:atemp + hr:hum + weathersit:temp + weathersit:atemp + weathersit:hum
 
 starting.model.2 <- cnt ~ as.factor(season) + as.factor(yr) + as.factor(mnth) + as.factor(hr) + as.factor(weathersit) + temp + atemp + hum
+
+starting.model.3 <- cnt ~ as.factor(season) + as.factor(yr) + as.factor(mnth) + as.factor(hr) + as.factor(weathersit) + temp + atemp + hum + season:temp + season:atemp + season:hum + yr:hum + mnth:temp + mnth:atemp + mnth:hum + hr:temp + hr:atemp + hr:hum + weathersit:temp + weathersit:atemp + weathersit:hum
+
+starting.model.4 <- cnt ~ as.factor(season) + as.factor(yr) + as.factor(mnth) + as.factor(hr) + as.factor(weathersit) + temp + atemp + hum
+
 ```
 
 To find out which of the two starting models fits the data better, the results of the two models are first compared.
@@ -356,11 +361,15 @@ To find out which of the two starting models fits the data better, the results o
 ```{r}
 lm.starting.model.1 <- lm(starting.model.1, data = d.bike)
 lm.starting.model.2 <- lm(starting.model.2, data = d.bike)
-summary(lm.starting.model.1)
-summary(lm.starting.model.2)
+lm.starting.model.3 <- lm(starting.model.3, data = d.bike)
+lm.starting.model.4 <- lm(starting.model.4, data = d.bike)
+summary(lm.starting.model.1)$adj.r.squared
+summary(lm.starting.model.2)$adj.r.squared
+summary(lm.starting.model.3)$adj.r.squared
+summary(lm.starting.model.4)$adj.r.squared
 ```
 
-If only the adjusted R-Squared is considered at this point, it is shown that the starting.model.1 with a value of 0.7093 explains the variability of the data better than the starting.model.2 with a value of 0.6838. Thus we take the starting.model.1 as a starting point for the model development.
+If only the adjusted R-Squared is considered at this point, it is shown that the starting.model.1 with a value of 0.72 explains the variability of the data better than the other starting models. Thus we take the starting.model.1 as a starting point for the model development.
 
 If now the p-value of the individual predictors and the interaction relationships in the output of starting.model.1 are considered, it becomes clear that certain attributes have no significant effect on cnt. The interaction relationships weathersit:atemp, weathersit:temp, hr:atemp and mnth:temp are deleted from the model.
 
@@ -381,7 +390,7 @@ lm.starting.model.1 <- update(lm.starting.model.1, . ~ . - weathersit:hum)
 summary(lm.starting.model.1)
 ```
 
-Now all interactions with weak and medium effect are removed from the model. atemp also shows a medium effect. Since it is present in certain interactions with strong effect, atemp is retained. The adapted R-Squared has only been reduced by 0.0003 points due to the adjustments. The final model now has an adjusted R-Squared of 0.709, which explains about 70% of the data. The final model now looks as follows:
+Now all interactions with weak and medium effect are removed from the model. atemp also shows a medium effect. Since it is present in certain interactions with strong effect, atemp is retained. The adapted R-Squared has only been reduced by 0.0003 points due to the adjustments. The final model now has an adjusted R-Squared of 0.7189, which explains about 72% of the data. The final model now looks as follows:
 
     cnt = season + yr + mnth + hr + weathersit + temp + atemp + hum + season:atemp + season:hum + yr:hum + mnth:atemp + hr:temp + hr:hum
 
@@ -393,23 +402,195 @@ final.model <- cnt ~ as.factor(season) + as.factor(yr) + as.factor(mnth) + as.fa
 
 ### Linear Regression
 ```{r}
-lm.bike.1 <- lm(cnt ~ as.factor(season) + as.factor(yr) + as.factor(mnth) + as.factor(hr) + as.factor(weathersit) + temp + atemp + hum + season:temp + season:atemp + season:hum + yr:hum + mnth:temp + mnth:atemp + mnth:hum + hr:temp + hr:atemp + hr:hum + weathersit:temp + weathersit:atemp + weathersit:hum, data = d.bike)
+lm.bike.1 <- lm(final.model, data = d.bike)
 summary(lm.bike.1)
 ```
 
-### Non-linear Regression
+```{r}
+lm.bike.1.rmse <- sqrt(mean(lm.bike.1$residuals^2))
+lm.bike.1.rmse
+```
 
+### Non-linear Regression
+```{r}
+gam.bike.1 <- gam(cnt ~ as.factor(season) + as.factor(yr) + as.factor(mnth) + as.factor(hr) + as.factor(weathersit) + s(hum) + s(temp) + s(atemp) + atemp:season + hum:season + hum:yr + atemp:mnth + temp:hr + hum:hr, data = d.bike)
+summary(gam.bike.1)
+```
+
+```{r}
+gam.bike.1.rmse <- sqrt(mean(gam.bike.1$residuals^2))
+gam.bike.1.rmse
+```
 
 ### Poisson Regression
 
 ```{r}
-poi.bike.1 <- glm(cnt ~ as.factor(season) + as.factor(yr) + as.factor(mnth) + as.factor(hr) + as.factor(weathersit) + temp + atemp + hum, family = "poisson", data = d.bike)
+poi.bike.1 <- glm(final.model, data = d.bike)
 summary(poi.bike.1)
 ```
 
+```{r}
+poi.bike.1.rmse <- sqrt(mean(poi.bike.1$residuals^2))
+poi.bike.1.rmse
+```
+
+### Compare the Regression Models
+
+
+```{r include=FALSE}
+d.bike.new <- subset(d.bike, select=-c(holiday, weekday, workingday, temp, atemp, windspeed, casual, registered))
+
+max(d.bike.new$cnt)
+max(d.bike.new$cnt)/5
+for(i in 1:nrow(d.bike)){
+  if(d.bike.new$cnt[i] >= 0 & d.bike.new$cnt[i] < 196){
+    d.bike.new$class[i] <- 0
+  } else if (d.bike.new$cnt[i] >= 196 & d.bike.new$cnt[i] < 391){
+    d.bike.new$class[i] <- 1
+  } else if (d.bike.new$cnt[i] >= 391 & d.bike.new$cnt[i] < 586){
+    d.bike.new$class[i] <- 2
+  } else if (d.bike.new$cnt[i] >= 586 & d.bike.new$cnt[i] < 781){
+    d.bike.new$class[i] <- 3
+  } else if (d.bike.new$cnt[i] >= 781 & d.bike.new$cnt[i] <= 977){
+    d.bike.new$class[i] <- 4
+  }
+}
+
+d.bike.train.id <- sample(seq_len(nrow(d.bike.new)),size = floor(0.75*nrow(d.bike.new)))
+d.bike.train.new <- d.bike.new[d.bike.train.id,]
+d.bike.test.new <- d.bike.new[-d.bike.train.id,]
+```
+
+
 ## 4. Trees (Malik)
 
-## 5. Support Vector Machines (Bodo)
+## 5. Support Vector Machines
+### 2-class linear SVM with casual und atemp
+```{r}
+xi <- 0.5525
+ggplot(data = d.bike, mapping = aes(y = casual, x = atemp)) + geom_point() + geom_vline(xintercept = xi, color = "blue")
+```
+
+```{r}
+for(i in 1:nrow(d.bike)){
+  if(d.bike$atemp[i] < 0.5525){
+    d.bike$class[i] <- 0
+  } else if (d.bike$atemp[i] >= 0.5525){
+    d.bike$class[i] <- 1
+  }
+}
+
+c.bike <- data.frame(x=d.bike, y=as.factor(d.bike$class))
+ggplot(data = c.bike, mapping = aes(y = x.casual, x = x.atemp,  color=y)) + geom_point() + geom_vline(xintercept = xi, size = 1, alpha = 0.5)
+```
+
+```{r}
+svm.bike.1 <- svm(y~x.casual+x.atemp,
+                  data = c.bike,
+                  kernel = "linear",
+                  cost = 10,
+                  scale = FALSE)
+summary(svm.bike.1)
+plot(svm.bike.1, c.bike, x.casual~x.atemp)
+```
+
+```{r}
+cost_range <-
+  c(0.01,
+    0.1,
+    1,
+    5,
+    10,
+    100)
+
+tune.out <- tune(
+  svm,
+  y ~ x.casual+x.atemp,
+  data = c.bike,
+  kernel = "linear",
+  ranges = list(cost = cost_range)
+)
+summary(tune.out)
+```
+
+```{r}
+svm.bike.1.best <- tune.out$best.model
+summary(svm.bike.1.best)
+plot(svm.bike.1.best, c.bike, x.casual~x.atemp)
+```
+
+```{r}
+table(predict = predict(svm.bike.1.best, c.bike),
+      truth = c.bike$y)
+```
+
+### 5-class linear SVM with the developed model
+```{r}
+d.bike.train.svm <- data.frame(x=subset(d.bike.train.new, select=-c(class)), y=as.factor(d.bike.train.new$class))
+d.bike.test.svm <- data.frame(x=subset(d.bike.test.new, select=-c(class)), y=as.factor(d.bike.test.new$class))
+```
+
+```{r}
+svm.bike.2 <- svm(y ~ .,
+                  data = d.bike.train.svm,
+                  kernel = "linear",
+                  cost = 0.01,
+                  scale = FALSE,
+)
+summary(svm.bike.2)
+```
+
+```{r}
+predict.svm.bike.2.train <- predict(svm.bike.2, d.bike.train.svm)
+table(predict.svm.bike.2.train, d.bike.train.svm$y)
+
+predict.svm.bike.2.test <- predict(svm.bike.2, d.bike.test.svm)
+table(predict.svm.bike.2.test, d.bike.test.svm$y)
+```
+
+```{r}
+cost_range <-
+  c(0.01,
+    0.1,
+    1,
+    5,
+    10,
+    100,
+    1000)
+
+tune.out <- tune(
+  svm,
+  y~.,
+  data = d.bike.train.svm,
+  kernel = "linear",
+  ranges = list(cost = cost_range),
+  scale = FALSE
+  )
+summary(tune.out)
+```
+
+```{r}
+svm.bike.2.best <- tune.out$best.model
+summary(svm.bike.2.best)
+```
+
+```{r}
+predict.svm.bike.2.best.train <- predict(svm.bike.2.best, d.bike.train.svm)
+table(predict.svm.bike.2.best.train, d.bike.train.svm$y)
+
+corrects=sum(predict.svm.bike.2.best.train==d.bike.train.svm$y)
+errors=sum(predict.svm.bike.2.best.train!=d.bike.train.svm$y)
+(performance_train=corrects/(corrects+errors))
+```
+
+```{r}
+predict.svm.bike.2.best.test <- predict(svm.bike.2.best, d.bike.test.svm)
+table(predict.svm.bike.2.best.test, d.bike.test.svm$y)
+
+corrects=sum(predict.svm.bike.2.best.test==d.bike.test.svm$y)
+errors=sum(predict.svm.bike.2.best.test!=d.bike.test.svm$y)
+(performance_test=corrects/(corrects+errors))
+```
 
 ## 6. Neural Networks (Cengiz)
 

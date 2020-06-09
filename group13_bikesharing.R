@@ -68,6 +68,30 @@ d.bike$log.cnt <- log(d.bike$cnt)
 ggplot(data = d.bike, aes(x=log.cnt)) +
   geom_histogram(bins=30, colour="black", ylab="Frequency") + xlab("Count") + ylab("Frequency")
 
+#Bootstrap with cnt
+sort(d.bike$cnt)
+mean(d.bike$cnt)
+
+id <- sample(1:length(d.bike$cnt), replace = TRUE)
+d.bike$cnt[id]
+mean(d.bike$cnt[id])
+
+B <- 1000
+t.mean <- c()
+for(i in 1:B){
+  t.id <- sample(1:length(d.bike$cnt), replace = TRUE)
+  t.d.bike <- d.bike$cnt[t.id]
+  t.mean[i] <- mean(t.d.bike)
+}
+length(t.mean)
+
+hist(t.mean, breaks = 50)
+abline(v = mean(d.bike$cnt), col = "red")
+
+sorted.means <- sort(t.mean)
+quantile(sorted.means, probs = c(0.025, 0.975))
+
+
 ## Investigating the season
 ggplot(data = d.bike, aes(group=season, y = cnt, x = as.factor(season))) +
   geom_boxplot()
@@ -207,22 +231,31 @@ ggplot(data = d.bike, mapping = aes(y = cnt, x = registered)) +
 lm.registered.1 <- lm(cnt ~ registered, data = d.bike)
 summary(lm.registered.1)
 
-
 ########## MODEL DEVELOPMENT ##########
 #model with all predictors
-full.model.1 <- cnt ~ as.factor(season) + as.factor(yr) + as.factor(mnth) + as.factor(hr) + as.factor(holiday) + as.factor(weekday) + as.factor(workingday) + as.factor(weathersit) + temp + atemp + hum + windspeed + casual + registered
+full.model.1 <- cnt ~ as.factor(season) + as.factor(yr) + as.factor(mnth) + as.factor(hr) + as.factor(holiday) + as.factor(weekday) + as.factor(workingday) + as.factor(weathersit) + poly(hum, degree = 8.7) + poly(temp, degree = 8) + poly(atemp, degree = 8.9) + windspeed + casual + registered
 
 #starting model with interaction effects
-starting.model.1 <- cnt ~ as.factor(season) + as.factor(yr) + as.factor(mnth) + as.factor(hr) + as.factor(weathersit) + temp + atemp + hum + season:temp + season:atemp + season:hum + yr:hum + mnth:temp + mnth:atemp + mnth:hum + hr:temp + hr:atemp + hr:hum + weathersit:temp + weathersit:atemp + weathersit:hum
+starting.model.1 <- cnt ~ as.factor(season) + as.factor(yr) + as.factor(mnth) + as.factor(hr) + as.factor(weathersit) + poly(hum, degree = 8.7) + poly(temp, degree = 8) + poly(atemp, degree = 8.9) + season:temp + season:atemp + season:hum + yr:hum + mnth:temp + mnth:atemp + mnth:hum + hr:temp + hr:atemp + hr:hum + weathersit:temp + weathersit:atemp + weathersit:hum
 
 #starting model without interaction effects
 starting.model.2 <- cnt ~ as.factor(season) + as.factor(yr) + as.factor(mnth) + as.factor(hr) + as.factor(weathersit) + temp + atemp + hum
 
-#Comparison
+#starting model without polynomial effects
+starting.model.3 <- cnt ~ as.factor(season) + as.factor(yr) + as.factor(mnth) + as.factor(hr) + as.factor(weathersit) + temp + atemp + hum + season:temp + season:atemp + season:hum + yr:hum + mnth:temp + mnth:atemp + mnth:hum + hr:temp + hr:atemp + hr:hum + weathersit:temp + weathersit:atemp + weathersit:hum
+
+#starting model without polynomial and interaction effects
+starting.model.4 <- cnt ~ as.factor(season) + as.factor(yr) + as.factor(mnth) + as.factor(hr) + as.factor(weathersit) + temp + atemp + hum
+
+#Comparison of starting models
 lm.starting.model.1 <- lm(starting.model.1, data = d.bike)
 lm.starting.model.2 <- lm(starting.model.2, data = d.bike)
-summary(lm.starting.model.1)
-summary(lm.starting.model.2)
+lm.starting.model.3 <- lm(starting.model.3, data = d.bike)
+lm.starting.model.4 <- lm(starting.model.4, data = d.bike)
+summary(lm.starting.model.1)$adj.r.squared
+summary(lm.starting.model.2)$adj.r.squared
+summary(lm.starting.model.3)$adj.r.squared
+summary(lm.starting.model.4)$adj.r.squared
 
 #Updating better model (lm.starting.model.1)
 #Drop the interactions without an effect
@@ -255,9 +288,23 @@ summary(lm.starting.model.1)
 summary(lm.full.model.1)
 
 #save starting.model.1 in final model
-final.model <- cnt ~ as.factor(season) + as.factor(yr) + as.factor(mnth) + as.factor(hr) + as.factor(weathersit) + temp + atemp + hum + atemp:season + hum:season + hum:yr + atemp:mnth + temp:hr + hum:hr
+final.model.1 <- cnt ~ as.factor(season) + as.factor(yr) + as.factor(mnth) + as.factor(hr) + as.factor(weathersit) + poly(hum, degree = 8.7) + poly(temp, degree = 8) + poly(atemp, degree = 8.9) + atemp:season + hum:season + hum:yr + atemp:mnth + temp:hr + hum:hr
 
 ########## CROSS VALIDATION ##########
+#Compare starting.model.1-4, full.model and final.model with adj. r-squared
+lm.starting.model.1 <- lm(starting.model.1, data = d.bike)
+lm.starting.model.2 <- lm(starting.model.2, data = d.bike)
+lm.starting.model.3 <- lm(starting.model.3, data = d.bike)
+lm.starting.model.4 <- lm(starting.model.4, data = d.bike)
+lm.full.model.1 <- lm(full.model.1, data = d.bike)
+lm.final.model.1 <- lm(final.model, data = d.bike)
+summary(lm.starting.model.1)$adj.r.squared
+summary(lm.starting.model.2)$adj.r.squared
+summary(lm.starting.model.3)$adj.r.squared
+summary(lm.starting.model.4)$adj.r.squared
+summary(lm.full.model.1)$adj.r.squared
+summary(lm.final.model.1)$adj.r.squared
+
 
 
 ########## REGRESSION ANALYSIS ##########
@@ -266,26 +313,25 @@ lm.bike.1 <- lm(final.model, data = d.bike)
 summary(lm.bike.1)
 
 #calculate the Root-mean-squared error
-lm.rmse <- sqrt(mean(lm.bike.1$residuals^2))
-lm.rmse
+lm.bike.1.rmse <- sqrt(mean(lm.bike.1$residuals^2))
+lm.bike.1.rmse
 
 ##Non-Linear Regression
-gam.bike.0 <- gam(final.model, data = d.bike)
-summary(gam.bike.0)
 gam.bike.1 <- gam(cnt ~ as.factor(season) + as.factor(yr) + as.factor(mnth) + as.factor(hr) + as.factor(weathersit) + s(hum) + s(temp) + s(atemp) + atemp:season + hum:season + hum:yr + atemp:mnth + temp:hr + hum:hr, data = d.bike)
 summary(gam.bike.1)
 
 #Calculate the Root-mean-squared error
-gam.rmse <- sqrt(mean(gam.bike.1$residuals^2))
-gam.rmse
+gam.bike.1.rmse <- sqrt(mean(gam.bike.1$residuals^2))
+gam.bike.1.rmse
 
 ##Poisson Regression
-poi.bike.1 <- glm(final.model, data = d.bike)
+poi.bike.1 <- glm(cnt ~ as.factor(season) + as.factor(yr) + as.factor(mnth) + as.factor(hr) + as.factor(weathersit) + poly(hum, degree = 8.7) + poly(temp, degree = 8) + poly(atemp, degree = 8.9) + atemp:season + hum:season + hum:yr + atemp:mnth + temp:hr + hum:hr, data = d.bike)
 summary(poi.bike.1)
+length(coef(poi.bike.1))
 
 #Calculate the Root-mean-squared error
-poi.rmse <- sqrt(mean(poi.bike.1$residuals^2))
-poi.rmse
+poi.bike.1.rmse <- sqrt(mean(poi.bike.1$residuals^2))
+poi.bike.1.rmse
 
 ##Compare the models
 
