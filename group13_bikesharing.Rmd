@@ -110,6 +110,32 @@ sd(d.bike$cnt)
 ```
 As we can see, this is a right skewed gamma distribution. So in most hours - the number of bike rentals are hourly observations - between 0 and 30 bikes (the most left bar) are rented.
 
+Bootstrapping:
+
+```{r}
+sort(d.bike$cnt)
+mean(d.bike$cnt)
+
+id <- sample(1:length(d.bike$cnt), replace = TRUE)
+d.bike$cnt[id]
+mean(d.bike$cnt[id])
+
+B <- 1000
+t.mean <- c()
+for(i in 1:B){
+  t.id <- sample(1:length(d.bike$cnt), replace = TRUE)
+  t.d.bike <- d.bike$cnt[t.id]
+  t.mean[i] <- mean(t.d.bike)
+}
+length(t.mean)
+
+hist(t.mean, breaks = 50)
+abline(v = mean(d.bike$cnt), col = "red")
+
+sorted.means <- sort(t.mean)
+quantile(sorted.means, probs = c(0.025, 0.975))
+```
+
 ### Season
 If we want to visualize the effect of the *season* as a categorical variable on the number of bike rentals it is a good idea to use a box plot.
 ```{r}
@@ -395,7 +421,74 @@ Now all interactions with weak and medium effect are removed from the model. ate
     cnt = season + yr + mnth + hr + weathersit + temp + atemp + hum + season:atemp + season:hum + yr:hum + mnth:atemp + hr:temp + hr:hum
 
 ```{r include=FALSE}
-final.model <- cnt ~ as.factor(season) + as.factor(yr) + as.factor(mnth) + as.factor(hr) + as.factor(weathersit) + temp + atemp + hum + atemp:season + hum:season + hum:yr + atemp:mnth + temp:hr + hum:hr
+final.model.1 <- cnt ~ as.factor(season) + as.factor(yr) + as.factor(mnth) + as.factor(hr) + as.factor(weathersit) + poly(hum, degree = 8.7) + poly(temp, degree = 8) + poly(atemp, degree = 8.9) + atemp:season + hum:season + hum:yr + atemp:mnth + temp:hr + hum:hr
+```
+
+### Cross Validation
+```{r include=FALSE}
+lm.starting.model.1 <- lm(starting.model.1, data = d.bike)
+lm.starting.model.2 <- lm(starting.model.2, data = d.bike)
+lm.starting.model.3 <- lm(starting.model.3, data = d.bike)
+lm.starting.model.4 <- lm(starting.model.4, data = d.bike)
+lm.full.model.1 <- lm(full.model.1, data = d.bike)
+lm.final.model.1 <- lm(final.model, data = d.bike)
+summary(lm.starting.model.1)$adj.r.squared
+summary(lm.starting.model.2)$adj.r.squared
+summary(lm.starting.model.3)$adj.r.squared
+summary(lm.starting.model.4)$adj.r.squared
+summary(lm.full.model.1)$adj.r.squared
+summary(lm.final.model.1)$adj.r.squared
+```
+
+```{r include=FALSE}
+for(i in 1:10^2){
+  d.bike.train.id <- sample(seq_len(nrow(d.bike)),size = floor(0.75*nrow(d.bike)))
+  d.bike.train <- d.bike[d.bike.train.id,]
+  d.bike.test <- d.bike[-d.bike.train.id,]
+  
+  #predict data with starting model 1
+  lm.starting.model.1.train <- lm(starting.model.1, data = d.bike.train)
+  predicted.starting.model.1.test <- predict(lm.starting.model.1.train,
+                                             newdata = d.bike.test)
+  r.squared.starting.model.1 <- cor(predicted.starting.model.1.test, d.bike.test$cnt)^2
+  
+  #predict data with starting model 2
+  lm.starting.model.2.train <- lm(starting.model.2, data = d.bike.train)
+  predicted.starting.model.2.test <- predict(lm.starting.model.2.train,
+                                             newdata = d.bike.test)
+  r.squared.starting.model.2 <- cor(predicted.starting.model.2.test, d.bike.test$cnt)^2
+  
+  #predict data with starting model 3
+  lm.starting.model.3.train <- lm(starting.model.3, data = d.bike.train)
+  predicted.starting.model.3.test <- predict(lm.starting.model.3.train,
+                                             newdata = d.bike.test)
+  r.squared.starting.model.3 <- cor(predicted.starting.model.3.test, d.bike.test$cnt)^2
+  
+  #predict data with starting model 4
+  lm.starting.model.4.train <- lm(starting.model.4, data = d.bike.train)
+  predicted.starting.model.4.test <- predict(lm.starting.model.4.train,
+                                             newdata = d.bike.test)
+  r.squared.starting.model.4 <- cor(predicted.starting.model.4.test, d.bike.test$cnt)^2
+  
+  #predict data with full model
+  lm.full.model.train <- lm(full.model.1, data = d.bike.train)
+  predicted.full.model.test <- predict(lm.full.model.train,
+                                       newdata = d.bike.test)
+  r.squared.full.model <- cor(predicted.full.model.test, d.bike.test$cnt)^2
+  
+  #predict data with final model
+  lm.final.model.train <- lm(final.model.1, data = d.bike.train)
+  predicted.final.model.test <- predict(lm.final.model.train,
+                                        newdata = d.bike.test)
+  r.squared.final.model <- cor(predicted.final.model.test, d.bike.test$cnt)^2
+}
+
+mean(r.squared.starting.model.1)
+mean(r.squared.starting.model.2)
+mean(r.squared.starting.model.3)
+mean(r.squared.starting.model.4)
+mean(r.squared.full.model)
+mean(r.squared.final.model)
 ```
 
 ## 3. Regression Analysis
@@ -434,8 +527,33 @@ poi.bike.1.rmse <- sqrt(mean(poi.bike.1$residuals^2))
 poi.bike.1.rmse
 ```
 
-### Compare the Regression Models
+### Comparing the models
+```{r}
+for(i in 1:10^2){
+  d.bike.train.id <- sample(seq_len(nrow(d.bike)),size = floor(0.75*nrow(d.bike)))
+  d.bike.train <- d.bike[d.bike.train.id,]
+  d.bike.test <- d.bike[-d.bike.train.id,]
+  
+  lm.bike.1.train <- lm(final.model, data = d.bike.train)
+  predicted.lm.bike.1.test <- predict(lm.bike.1.train,
+                                             newdata = d.bike.test)
+  r.squared.lm.bike.1 <- cor(predicted.lm.bike.1.test, d.bike.test$cnt)^2
+  
+  gam.bike.1.train <- gam(cnt ~ as.factor(season) + as.factor(yr) + as.factor(mnth) + as.factor(hr) + as.factor(weathersit) + s(hum) + s(temp) + s(atemp) + atemp:season + hum:season + hum:yr + atemp:mnth + temp:hr + hum:hr, data = d.bike.train)
+  predicted.gam.bike.1.test <- predict(gam.bike.1.train,
+                                        newdata = d.bike.test)
+  r.squared.gam.bike.1 <- cor(predicted.gam.bike.1.test, d.bike.test$cnt)^2
+  
+  poi.bike.1.train <- glm(final.model.1, data = d.bike)
+  predicted.poi.bike.1.test <- predict(poi.bike.1.train,
+                                        newdata = d.bike.test)
+  r.squared.poi.bike.1 <- cor(predicted.poi.bike.1.test, d.bike.test$cnt)^2
+}
 
+mean(r.squared.lm.bike.1)
+mean(r.squared.gam.bike.1)
+mean(r.squared.poi.bike.1)
+```
 
 ```{r include=FALSE}
 d.bike.new <- subset(d.bike, select=-c(holiday, weekday, workingday, temp, atemp, windspeed, casual, registered))

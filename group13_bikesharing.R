@@ -381,6 +381,34 @@ poi.bike.1.rmse <- sqrt(mean(poi.bike.1$residuals^2))
 poi.bike.1.rmse
 
 ##Compare the models
+#Compare the three models
+for(i in 1:10^2){
+  d.bike.train.id <- sample(seq_len(nrow(d.bike)),size = floor(0.75*nrow(d.bike)))
+  d.bike.train <- d.bike[d.bike.train.id,]
+  d.bike.test <- d.bike[-d.bike.train.id,]
+  
+  #predict data with linear model
+  lm.bike.1.train <- lm(final.model, data = d.bike.train)
+  predicted.lm.bike.1.test <- predict(lm.bike.1.train,
+                                             newdata = d.bike.test)
+  r.squared.lm.bike.1 <- cor(predicted.lm.bike.1.test, d.bike.test$cnt)^2
+  
+  #predict data with non-linear model
+  gam.bike.1.train <- gam(cnt ~ as.factor(season) + as.factor(yr) + as.factor(mnth) + as.factor(hr) + as.factor(weathersit) + s(hum) + s(temp) + s(atemp) + atemp:season + hum:season + hum:yr + atemp:mnth + temp:hr + hum:hr, data = d.bike.train)
+  predicted.gam.bike.1.test <- predict(gam.bike.1.train,
+                                        newdata = d.bike.test)
+  r.squared.gam.bike.1 <- cor(predicted.gam.bike.1.test, d.bike.test$cnt)^2
+  
+  #predict data with poisson model
+  poi.bike.1.train <- glm(final.model.1, data = d.bike)
+  predicted.poi.bike.1.test <- predict(poi.bike.1.train,
+                                        newdata = d.bike.test)
+  r.squared.poi.bike.1 <- cor(predicted.poi.bike.1.test, d.bike.test$cnt)^2
+}
+
+mean(r.squared.lm.bike.1)
+mean(r.squared.gam.bike.1)
+mean(r.squared.poi.bike.1)
 
 ########## UPDATING DATASET FOR CLASSIFICATION ##########
 ##Remove features
