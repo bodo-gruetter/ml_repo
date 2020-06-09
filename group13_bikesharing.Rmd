@@ -122,13 +122,14 @@ sd(d.bike$cnt)
 As we can see, this is a right skewed gamma distribution. So in most hours - the number of bike rentals are hourly observations - between 0 and 30 bikes (the most left bar) are rented.
 
 Bootstrapping:
+```{r include=FALSE}
+sort(d.bike$cnt)
+```
 
 ```{r}
-sort(d.bike$cnt)
 mean(d.bike$cnt)
 
 id <- sample(1:length(d.bike$cnt), replace = TRUE)
-d.bike$cnt[id]
 mean(d.bike$cnt[id])
 
 B <- 1000
@@ -383,9 +384,9 @@ First five models are initialized. The full model with all predictors, the start
 ```{r}
 full.model.1 <- cnt ~ as.factor(season) + as.factor(yr) + as.factor(mnth) + as.factor(hr) + as.factor(holiday) + as.factor(weekday) + as.factor(workingday) + as.factor(weathersit) + temp + atemp + hum + windspeed + casual + registered
 
-starting.model.1 <- cnt ~ as.factor(season) + as.factor(yr) + as.factor(mnth) + as.factor(hr) + as.factor(weathersit) + temp + atemp + hum + season:temp + season:atemp + season:hum + yr:hum + mnth:temp + mnth:atemp + mnth:hum + hr:temp + hr:atemp + hr:hum + weathersit:temp + weathersit:atemp + weathersit:hum
+starting.model.1 <- cnt ~ as.factor(season) + as.factor(yr) + as.factor(mnth) + as.factor(hr) + as.factor(weathersit) + poly(hum, degree = 8.7) + poly(temp, degree = 8) + poly(atemp, degree = 8.9) + season:temp + season:atemp + season:hum + yr:hum + mnth:temp + mnth:atemp + mnth:hum + hr:temp + hr:atemp + hr:hum + weathersit:temp + weathersit:atemp + weathersit:hum
 
-starting.model.2 <- cnt ~ as.factor(season) + as.factor(yr) + as.factor(mnth) + as.factor(hr) + as.factor(weathersit) + temp + atemp + hum
+starting.model.2 <- cnt ~ as.factor(season) + as.factor(yr) + as.factor(mnth) + as.factor(hr) + as.factor(weathersit) + poly(hum, degree = 8.7) + poly(temp, degree = 8) + poly(atemp, degree = 8.9)
 
 starting.model.3 <- cnt ~ as.factor(season) + as.factor(yr) + as.factor(mnth) + as.factor(hr) + as.factor(weathersit) + temp + atemp + hum + season:temp + season:atemp + season:hum + yr:hum + mnth:temp + mnth:atemp + mnth:hum + hr:temp + hr:atemp + hr:hum + weathersit:temp + weathersit:atemp + weathersit:hum
 
@@ -451,12 +452,12 @@ summary(lm.full.model.1)$adj.r.squared
 summary(lm.final.model.1)$adj.r.squared
 ```
 
-```{r}
-for(i in 1:10^2){
+```{r, warning = FALSE}
+for(i in 1:10){
   d.bike.train.id <- sample(seq_len(nrow(d.bike)),size = floor(0.75*nrow(d.bike)))
   d.bike.train <- d.bike[d.bike.train.id,]
   d.bike.test <- d.bike[-d.bike.train.id,]
-  
+
   #predict data with starting model 1
   lm.starting.model.1.train <- lm(starting.model.1, data = d.bike.train)
   predicted.starting.model.1.test <- predict(lm.starting.model.1.train,
@@ -506,7 +507,7 @@ mean(r.squared.final.model)
 
 ### Linear Regression
 ```{r}
-lm.bike.1 <- lm(final.model, data = d.bike)
+lm.bike.1 <- lm(final.model.1, data = d.bike)
 summary(lm.bike.1)
 ```
 
@@ -529,7 +530,7 @@ gam.bike.1.rmse
 ### Poisson Regression
 
 ```{r}
-poi.bike.1 <- glm(final.model, data = d.bike)
+poi.bike.1 <- glm(final.model.1, data = d.bike)
 summary(poi.bike.1)
 ```
 
@@ -539,22 +540,27 @@ poi.bike.1.rmse
 ```
 
 ### Comparing the models
-```{r}
-for(i in 1:10^2){
+```{r, warning = FALSE}
+##Compare the models
+#Compare the three models
+for(i in 1:10){
   d.bike.train.id <- sample(seq_len(nrow(d.bike)),size = floor(0.75*nrow(d.bike)))
   d.bike.train <- d.bike[d.bike.train.id,]
   d.bike.test <- d.bike[-d.bike.train.id,]
   
-  lm.bike.1.train <- lm(final.model, data = d.bike.train)
+  #predict data with linear model
+  lm.bike.1.train <- lm(final.model.1, data = d.bike.train)
   predicted.lm.bike.1.test <- predict(lm.bike.1.train,
                                              newdata = d.bike.test)
   r.squared.lm.bike.1 <- cor(predicted.lm.bike.1.test, d.bike.test$cnt)^2
   
+  #predict data with non-linear model
   gam.bike.1.train <- gam(cnt ~ as.factor(season) + as.factor(yr) + as.factor(mnth) + as.factor(hr) + as.factor(weathersit) + s(hum) + s(temp) + s(atemp) + atemp:season + hum:season + hum:yr + atemp:mnth + temp:hr + hum:hr, data = d.bike.train)
   predicted.gam.bike.1.test <- predict(gam.bike.1.train,
                                         newdata = d.bike.test)
   r.squared.gam.bike.1 <- cor(predicted.gam.bike.1.test, d.bike.test$cnt)^2
   
+  #predict data with poisson model
   poi.bike.1.train <- glm(final.model.1, data = d.bike)
   predicted.poi.bike.1.test <- predict(poi.bike.1.train,
                                         newdata = d.bike.test)

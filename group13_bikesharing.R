@@ -251,7 +251,7 @@ full.model.1 <- cnt ~ as.factor(season) + as.factor(yr) + as.factor(mnth) + as.f
 starting.model.1 <- cnt ~ as.factor(season) + as.factor(yr) + as.factor(mnth) + as.factor(hr) + as.factor(weathersit) + poly(hum, degree = 8.7) + poly(temp, degree = 8) + poly(atemp, degree = 8.9) + season:temp + season:atemp + season:hum + yr:hum + mnth:temp + mnth:atemp + mnth:hum + hr:temp + hr:atemp + hr:hum + weathersit:temp + weathersit:atemp + weathersit:hum
 
 #starting model without interaction effects
-starting.model.2 <- cnt ~ as.factor(season) + as.factor(yr) + as.factor(mnth) + as.factor(hr) + as.factor(weathersit) + temp + atemp + hum
+starting.model.2 <- cnt ~ as.factor(season) + as.factor(yr) + as.factor(mnth) + as.factor(hr) + as.factor(weathersit) + poly(hum, degree = 8.7) + poly(temp, degree = 8) + poly(atemp, degree = 8.9)
 
 #starting model without polynomial effects
 starting.model.3 <- cnt ~ as.factor(season) + as.factor(yr) + as.factor(mnth) + as.factor(hr) + as.factor(weathersit) + temp + atemp + hum + season:temp + season:atemp + season:hum + yr:hum + mnth:temp + mnth:atemp + mnth:hum + hr:temp + hr:atemp + hr:hum + weathersit:temp + weathersit:atemp + weathersit:hum
@@ -317,11 +317,8 @@ summary(lm.starting.model.4)$adj.r.squared
 summary(lm.full.model.1)$adj.r.squared
 summary(lm.final.model.1)$adj.r.squared
 
-str(d.bike.train)
-str(d.bike.test)
 
-
-for(i in 1:10^2){
+for(i in 1:10){
   d.bike.train.id <- sample(seq_len(nrow(d.bike)),size = floor(0.75*nrow(d.bike)))
   d.bike.train <- d.bike[d.bike.train.id,]
   d.bike.test <- d.bike[-d.bike.train.id,]
@@ -398,13 +395,13 @@ poi.bike.1.rmse
 
 ##Compare the models
 #Compare the three models
-for(i in 1:10^2){
+for(i in 1:10){
   d.bike.train.id <- sample(seq_len(nrow(d.bike)),size = floor(0.75*nrow(d.bike)))
   d.bike.train <- d.bike[d.bike.train.id,]
   d.bike.test <- d.bike[-d.bike.train.id,]
   
   #predict data with linear model
-  lm.bike.1.train <- lm(final.model, data = d.bike.train)
+  lm.bike.1.train <- lm(final.model.1, data = d.bike.train)
   predicted.lm.bike.1.test <- predict(lm.bike.1.train,
                                              newdata = d.bike.test)
   r.squared.lm.bike.1 <- cor(predicted.lm.bike.1.test, d.bike.test$cnt)^2
