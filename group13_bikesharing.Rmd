@@ -394,7 +394,7 @@ starting.model.4 <- cnt ~ as.factor(season) + as.factor(yr) + as.factor(mnth) + 
 
 ```
 
-To find out which of the two starting models fits the data better, the results of the two models are first compared.
+To find out which of the four starting models fits the data better, the results of the four models are first compared.
 
 ```{r}
 lm.starting.model.1 <- lm(starting.model.1, data = d.bike)
@@ -407,52 +407,48 @@ summary(lm.starting.model.3)$adj.r.squared
 summary(lm.starting.model.4)$adj.r.squared
 ```
 
-If only the adjusted R-Squared is considered at this point, it is shown that the starting.model.1 with a value of 0.72 explains the variability of the data better than the other starting models. Thus we take the starting.model.1 as a starting point for the model development.
-
-If now the p-value of the individual predictors and the interaction relationships in the output of starting.model.1 are considered, it becomes clear that certain attributes have no significant effect on cnt. The interaction relationships weathersit:atemp, weathersit:temp, hr:atemp and mnth:temp are deleted from the model.
+If only the adjusted R-Squared is considered at this point, it is shown that the starting.model.1 with a value of about 0.747 explains the variability of the data better than the other starting models. Thus we take the starting.model.1 as a starting point for the model development.
 
 ```{r}
+summary(lm.starting.model.1)
+```
+
+If now the p-value of the individual predictors and the interaction relationships in the output of starting.model.1 are considered, it becomes clear that certain attributes have no significant effect on cnt. The interaction relationships weathersit:atemp, weathersit:temp, hr:atemp and mnth:temp are deleted from the model. In the second iteration the interaction relations and predictors with a weak and a medium effect are removed from the model. These are: mnth:hum, season:temp and weathersit:atemp. The iteration was performed separately in the analysis (see lines 246-303, group13_bikesharing.R). For reasons of clarity, the predictors and interactions are removed in one pass.
+
+```{r}
+##1. iteration
 lm.starting.model.1 <- update(lm.starting.model.1, . ~ . - weathersit:atemp)
 lm.starting.model.1 <- update(lm.starting.model.1, . ~ . - weathersit:temp)
 lm.starting.model.1 <- update(lm.starting.model.1, . ~ . - hr:atemp)
 lm.starting.model.1 <- update(lm.starting.model.1, . ~ . - mnth:temp)
-summary(lm.starting.model.1)
-```
-
-In the second iteration the interaction relations and predictors with a weak and a medium effect are removed from the model. These are: mnth:hum, season:temp and weathersit:atemp.
-
-```{r}
+##2. iteration
 lm.starting.model.1 <- update(lm.starting.model.1, . ~ . - mnth:hum)
 lm.starting.model.1 <- update(lm.starting.model.1, . ~ . - season:temp)
 lm.starting.model.1 <- update(lm.starting.model.1, . ~ . - weathersit:hum)
 summary(lm.starting.model.1)
 ```
 
-Now all interactions with weak and medium effect are removed from the model. atemp also shows a medium effect. Since it is present in certain interactions with strong effect, atemp is retained. The adapted R-Squared has only been reduced by 0.0003 points due to the adjustments. The final model now has an adjusted R-Squared of 0.7189, which explains about 72% of the data. The final model now looks as follows:
+Now all interactions with weak and medium effect are removed from the model. atemp also shows a medium effect. Since it is present in certain interactions with strong effect, atemp is retained. The adapted R-Squared has only been reduced by 0.0003 points due to the adjustments. The final model now has an adjusted R-Squared of 0.7452, which explains about 74.5% of the data. The final model now looks as follows:
 
     cnt = season + yr + mnth + hr + weathersit + temp + atemp + hum + season:atemp + season:hum + yr:hum + mnth:atemp + hr:temp + hr:hum
+    
+The predictors temp, atemp and hum show polynomial effects.
 
 ```{r include=FALSE}
 final.model.1 <- cnt ~ as.factor(season) + as.factor(yr) + as.factor(mnth) + as.factor(hr) + as.factor(weathersit) + poly(hum, degree = 8.7) + poly(temp, degree = 8) + poly(atemp, degree = 8.9) + atemp:season + hum:season + hum:yr + atemp:mnth + temp:hr + hum:hr
 ```
 
 ### Cross Validation
-```{r}
+In this section, the result from the section "Model development" shall be validated by cross-validation. For this purpose, all models that played a role in the development of a final model are compared with each other. The mean R-squared of the individual models, which is calculated from 10-fold cross-validation, serves as a comparison value.
+
+```{r, warning = FALSE}
 lm.starting.model.1 <- lm(starting.model.1, data = d.bike)
 lm.starting.model.2 <- lm(starting.model.2, data = d.bike)
 lm.starting.model.3 <- lm(starting.model.3, data = d.bike)
 lm.starting.model.4 <- lm(starting.model.4, data = d.bike)
 lm.full.model.1 <- lm(full.model.1, data = d.bike)
 lm.final.model.1 <- lm(final.model.1, data = d.bike)
-summary(lm.starting.model.1)$adj.r.squared
-summary(lm.starting.model.2)$adj.r.squared
-summary(lm.starting.model.3)$adj.r.squared
-summary(lm.starting.model.4)$adj.r.squared
-summary(lm.full.model.1)$adj.r.squared
-summary(lm.final.model.1)$adj.r.squared
-```
 
-```{r, warning = FALSE}
 for(i in 1:10){
   d.bike.train.id <- sample(seq_len(nrow(d.bike)),size = floor(0.75*nrow(d.bike)))
   d.bike.train <- d.bike[d.bike.train.id,]
@@ -503,29 +499,24 @@ mean(r.squared.full.model)
 mean(r.squared.final.model)
 ```
 
+As the comparison shows, the full.model.1 according to R-Squared is the best model. However, since the final model is the second best and much less complex than the full model, the result of the model development can be validated. For further analysis steps final.model.1 is used.
+
 ## 3. Regression Analysis
+In this chapter the bike rental cnt will be predicted respectively estimated using a linear, a non-linear and a poisson regressive model. The three models will then be compared using a 10-fold cross-validation based on the R-Squared. 
 
 ### Linear Regression
 ```{r}
 lm.bike.1 <- lm(final.model.1, data = d.bike)
 summary(lm.bike.1)
 ```
-
-```{r}
-lm.bike.1.rmse <- sqrt(mean(lm.bike.1$residuals^2))
-lm.bike.1.rmse
-```
+The linear regression model explains about 74.5 of the variability of the data. This value has already been calculated in the section "Model development".
 
 ### Non-linear Regression
 ```{r}
 gam.bike.1 <- gam(cnt ~ as.factor(season) + as.factor(yr) + as.factor(mnth) + as.factor(hr) + as.factor(weathersit) + s(hum) + s(temp) + s(atemp) + atemp:season + hum:season + hum:yr + atemp:mnth + temp:hr + hum:hr, data = d.bike)
 summary(gam.bike.1)
 ```
-
-```{r}
-gam.bike.1.rmse <- sqrt(mean(gam.bike.1$residuals^2))
-gam.bike.1.rmse
-```
+The non-linear regression model shows the same result as the linear regression model. The variability of the data is explained by 74.5%.
 
 ### Poisson Regression
 
@@ -534,15 +525,9 @@ poi.bike.1 <- glm(final.model.1, data = d.bike)
 summary(poi.bike.1)
 ```
 
-```{r}
-poi.bike.1.rmse <- sqrt(mean(poi.bike.1$residuals^2))
-poi.bike.1.rmse
-```
-
 ### Comparing the models
+To enable a meaningful comparison between the three models, the models should train 10 times with the training set and then predict the new data. Finally, the corresponding R-Squared of all three models is compared to each other to make a statement about the best model.
 ```{r, warning = FALSE}
-##Compare the models
-#Compare the three models
 for(i in 1:10){
   d.bike.train.id <- sample(seq_len(nrow(d.bike)),size = floor(0.75*nrow(d.bike)))
   d.bike.train <- d.bike[d.bike.train.id,]
@@ -571,6 +556,90 @@ mean(r.squared.lm.bike.1)
 mean(r.squared.gam.bike.1)
 mean(r.squared.poi.bike.1)
 ```
+The result is quite close. But the best result is achieved by the poisson regressive model with an average R-Squared.
+
+## 4. Trees
+
+## 5. Support Vector Machines
+The fifth chapter deals with the classification of data using Support Vector Machines (SVM). Two SVMs are trained and tested. In the first case, the data is classified into two classes using SVM with two predictors. In the second case, the data is classified in five classes using the final model.
+
+### 2-class linear SVM with casual und atemp
+An interesting classification is the division of the data in cyclists without subscription (casual) into those who ride during cool temperatures and those who ride during very warm temperatures. The two attributes casual and breath are considered. In a plot, a quite centered seperating hyperplane is supposed to divide the data into two classes. For this purpose an intercept of the x-value atemp of 0.5525 is defined straight-forward, which separates the two types of cyclist visually.
+
+```{r}
+xi <- 0.5525
+ggplot(data = d.bike, mapping = aes(y = casual, x = atemp)) + geom_point() + geom_vline(xintercept = xi, color = "blue")
+```
+
+The scatterplot shows the blue hyperplane.
+
+The next step is to classify the data so that the SVM model knows which classes to determine. This is a prerequisite in the classification. A simple if-statement can be defined for classification. If atemp is smaller than the vertical intercept defined in the visual example, it is class 0, i.e. those cyclists without a subscription who rent a bicycle even at cooler temperatures. If the observed atemp is greater than or equal to the defined intercept of 0.5525, then we are dealing with class 1, i.e. a cyclist who rents a bicycle even in warmer temperatures. A for-loop is used to perform the classification for each observed value.
+
+```{r}
+for(i in 1:nrow(d.bike)){
+  if(d.bike$atemp[i] < 0.5525){
+    d.bike$class[i] <- 0
+  } else if (d.bike$atemp[i] >= 0.5525){
+    d.bike$class[i] <- 1
+  }
+}
+
+c.bike <- data.frame(x=d.bike, y=as.factor(d.bike$class))
+ggplot(data = c.bike, mapping = aes(y = x.casual, x = x.atemp,  color=y)) + geom_point() + geom_vline(xintercept = xi, size = 1, alpha = 0.5)
+```
+The figure shows the two classes separated by color.
+
+Now that the classes and thus the target variable are defined, an SVM model can be fitted. As can be seen from the summary, 628 support vectors are available at the cost of 10. 316 of them are in class 0 and 312 in class 1.
+
+```{r}
+svm.bike.1 <- svm(y~x.casual+x.atemp,
+                  data = c.bike,
+                  kernel = "linear",
+                  cost = 10,
+                  scale = FALSE)
+summary(svm.bike.1)
+plot(svm.bike.1, c.bike, x.casual~x.atemp)
+```
+
+The plot shows the classification and the support vectors.
+
+In order to obtain the best model with optimal cost factor, a vector with different cost values is first defined and the tune-function is used.
+
+```{r}
+cost_range <-
+  c(0.01,
+    0.1,
+    1,
+    5,
+    10,
+    100)
+
+tune.out <- tune(
+  svm,
+  y ~ x.casual+x.atemp,
+  data = c.bike,
+  kernel = "linear",
+  ranges = list(cost = cost_range)
+)
+summary(tune.out)
+```
+As can be seen, with a cost factor of 1, an error rate of 0 is already possible.
+
+```{r}
+svm.bike.1.best <- tune.out$best.model
+summary(svm.bike.1.best)
+plot(svm.bike.1.best, c.bike, x.casual~x.atemp)
+```
+The result of the best model shows us this. The best model has an optimal cost factor of 1 and consequently there are less support vectors. It is a little more than half of the first model.
+
+```{r}
+table(predict = predict(svm.bike.1.best, c.bike),
+      truth = c.bike$y)
+```
+
+As the table shows, no errors are made in the prediction and the data is correctly classified.
+
+### 5-class linear SVM with the developed model
 
 ```{r include=FALSE}
 d.bike.new <- subset(d.bike, select=-c(holiday, weekday, workingday, temp, atemp, windspeed, casual, registered))
@@ -596,70 +665,6 @@ d.bike.train.new <- d.bike.new[d.bike.train.id,]
 d.bike.test.new <- d.bike.new[-d.bike.train.id,]
 ```
 
-
-## 4. Trees (Malik)
-
-## 5. Support Vector Machines
-### 2-class linear SVM with casual und atemp
-```{r}
-xi <- 0.5525
-ggplot(data = d.bike, mapping = aes(y = casual, x = atemp)) + geom_point() + geom_vline(xintercept = xi, color = "blue")
-```
-
-```{r}
-for(i in 1:nrow(d.bike)){
-  if(d.bike$atemp[i] < 0.5525){
-    d.bike$class[i] <- 0
-  } else if (d.bike$atemp[i] >= 0.5525){
-    d.bike$class[i] <- 1
-  }
-}
-
-c.bike <- data.frame(x=d.bike, y=as.factor(d.bike$class))
-ggplot(data = c.bike, mapping = aes(y = x.casual, x = x.atemp,  color=y)) + geom_point() + geom_vline(xintercept = xi, size = 1, alpha = 0.5)
-```
-
-```{r}
-svm.bike.1 <- svm(y~x.casual+x.atemp,
-                  data = c.bike,
-                  kernel = "linear",
-                  cost = 10,
-                  scale = FALSE)
-summary(svm.bike.1)
-plot(svm.bike.1, c.bike, x.casual~x.atemp)
-```
-
-```{r}
-cost_range <-
-  c(0.01,
-    0.1,
-    1,
-    5,
-    10,
-    100)
-
-tune.out <- tune(
-  svm,
-  y ~ x.casual+x.atemp,
-  data = c.bike,
-  kernel = "linear",
-  ranges = list(cost = cost_range)
-)
-summary(tune.out)
-```
-
-```{r}
-svm.bike.1.best <- tune.out$best.model
-summary(svm.bike.1.best)
-plot(svm.bike.1.best, c.bike, x.casual~x.atemp)
-```
-
-```{r}
-table(predict = predict(svm.bike.1.best, c.bike),
-      truth = c.bike$y)
-```
-
-### 5-class linear SVM with the developed model
 ```{r}
 d.bike.train.svm <- data.frame(x=subset(d.bike.train.new, select=-c(class)), y=as.factor(d.bike.train.new$class))
 d.bike.test.svm <- data.frame(x=subset(d.bike.test.new, select=-c(class)), y=as.factor(d.bike.test.new$class))
@@ -727,6 +732,4 @@ errors=sum(predict.svm.bike.2.best.test!=d.bike.test.svm$y)
 (performance_test=corrects/(corrects+errors))
 ```
 
-## 6. Neural Networks (Cengiz)
-
-## 7. Conclusion (Comparing all models in one table)
+## 6. Neural Networks
