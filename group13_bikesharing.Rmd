@@ -17,6 +17,10 @@ library(tree)
 library(mgcv)
 ```
 
+```{r message=FALSE, include=FALSE}
+set.seed(123)
+```
+
 ## 1. Getting Data
 ### Data source
 We downloaded the dataset "bikesharing.csv" from https://code.datasciencedojo.com/datasciencedojo/datasets/tree/master/Bike%20Sharing.
@@ -640,10 +644,15 @@ table(predict = predict(svm.bike.1.best, c.bike),
 As the table shows, no errors are made in the prediction and the data is correctly classified.
 
 ### 5-class linear SVM with the developed model
+In the second section of this chapter, a classification into five classes based on the final.model.1 will be made. Due to the multi-dimensionality (more than 3 predictors), the SVM classification cannot be visualized.
 
 ```{r include=FALSE}
 d.bike.new <- subset(d.bike, select=-c(holiday, weekday, workingday, temp, atemp, windspeed, casual, registered))
+```
 
+For this purpose, the five classes are formed first. The classes indicate whether few (0) or many (5) bicycles were rented at the observed hour. The classes are formed according to a simple principle. The maximum observed value of cnt is divided by 5. Thus five equally large intervals are formed. Finally, the training and test data set is initialized with the classified data.
+
+```{r}
 max(d.bike.new$cnt)
 max(d.bike.new$cnt)/5
 for(i in 1:nrow(d.bike)){
@@ -665,10 +674,14 @@ d.bike.train.new <- d.bike.new[d.bike.train.id,]
 d.bike.test.new <- d.bike.new[-d.bike.train.id,]
 ```
 
+To be able to fit an SVM model, the two data sets must be transformed.The class is removed from the x-variables and assigned as factor to the y-variable, i.e. the target variable.
+
 ```{r}
 d.bike.train.svm <- data.frame(x=subset(d.bike.train.new, select=-c(class)), y=as.factor(d.bike.train.new$class))
 d.bike.test.svm <- data.frame(x=subset(d.bike.test.new, select=-c(class)), y=as.factor(d.bike.test.new$class))
 ```
+
+Now the model can be fitted. The cost factor is deliberately set low, so that errors in the classification occur first, which are then to be eliminated with the tuning. At this point it should also be noted that the model in this example is now fitted with the training data record.
 
 ```{r}
 svm.bike.2 <- svm(y ~ .,
@@ -680,6 +693,8 @@ svm.bike.2 <- svm(y ~ .,
 summary(svm.bike.2)
 ```
 
+Now the classes are predicted once on the training and once on the test data set.
+
 ```{r}
 predict.svm.bike.2.train <- predict(svm.bike.2, d.bike.train.svm)
 table(predict.svm.bike.2.train, d.bike.train.svm$y)
@@ -687,6 +702,8 @@ table(predict.svm.bike.2.train, d.bike.train.svm$y)
 predict.svm.bike.2.test <- predict(svm.bike.2, d.bike.test.svm)
 table(predict.svm.bike.2.test, d.bike.test.svm$y)
 ```
+
+Errors are made on both data sets. These must now be eliminated. To do this, a cost range is initialized as in the first example. The model is again optimized using the tune function.
 
 ```{r}
 cost_range <-
@@ -709,10 +726,16 @@ tune.out <- tune(
 summary(tune.out)
 ```
 
+Also in this example, a cost value of 1 seems to be sufficient to obtain an error rate of 0.
+
 ```{r}
 svm.bike.2.best <- tune.out$best.model
 summary(svm.bike.2.best)
 ```
+
+The optimal model shows the cost value 1. In this classification "only" 59 support vectors are generated. These are distributed very differently in the classes. The middle class 2 contains only one support vector.
+
+Subsequently, the classes are to be predicted once on the training data set and once on the test data set. Based on the ratio of correct and incorrect classifications, the performance on both data sets will be evaluated.
 
 ```{r}
 predict.svm.bike.2.best.train <- predict(svm.bike.2.best, d.bike.train.svm)
@@ -723,6 +746,8 @@ errors=sum(predict.svm.bike.2.best.train!=d.bike.train.svm$y)
 (performance_train=corrects/(corrects+errors))
 ```
 
+A performance rate of 100% is achieved on the training data record. This can already be seen in the table. All data is assigned to the correct classes.
+
 ```{r}
 predict.svm.bike.2.best.test <- predict(svm.bike.2.best, d.bike.test.svm)
 table(predict.svm.bike.2.best.test, d.bike.test.svm$y)
@@ -731,5 +756,7 @@ corrects=sum(predict.svm.bike.2.best.test==d.bike.test.svm$y)
 errors=sum(predict.svm.bike.2.best.test!=d.bike.test.svm$y)
 (performance_test=corrects/(corrects+errors))
 ```
+
+The same result is shown on the test data set. The data is correctly classified using a new data set. An SVM can make good predictions for the two classification problems presented and the selected data set.
 
 ## 6. Neural Networks
