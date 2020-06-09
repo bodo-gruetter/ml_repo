@@ -30,6 +30,16 @@ d.bike <- read.csv("bikesharing.csv", header=TRUE)
 ##Remove instant and dteday
 d.bike <- subset(d.bike, select=-c(instant, dteday))
 
+##cast categoricals to factor
+d.bike$season <- as.factor(d.bike$season)
+d.bike$yr <- as.factor(d.bike$yr)
+d.bike$mnth <- as.factor(d.bike$mnth)
+d.bike$hr <- as.factor(d.bike$hr)
+d.bike$holiday <- as.factor(d.bike$holiday)
+d.bike$weekday <- as.factor(d.bike$weekday)
+d.bike$workingday <- as.factor(d.bike$workingday)
+d.bike$weathersit <- as.factor(d.bike$weathersit)
+
 ##Descriptive data analysis
 str(d.bike)
 head(d.bike)
@@ -50,6 +60,8 @@ d.bike.test <- d.bike[-d.bike.train.id,]
 nrow(d.bike)
 nrow(d.bike.train)
 nrow(d.bike.test)
+str(d.bike.train)
+str(d.bike.test)
 
 ########## EXPLORATIVE ANALYSIS ##########
 
@@ -297,7 +309,7 @@ lm.starting.model.2 <- lm(starting.model.2, data = d.bike)
 lm.starting.model.3 <- lm(starting.model.3, data = d.bike)
 lm.starting.model.4 <- lm(starting.model.4, data = d.bike)
 lm.full.model.1 <- lm(full.model.1, data = d.bike)
-lm.final.model.1 <- lm(final.model, data = d.bike)
+lm.final.model.1 <- lm(final.model.1, data = d.bike)
 summary(lm.starting.model.1)$adj.r.squared
 summary(lm.starting.model.2)$adj.r.squared
 summary(lm.starting.model.3)$adj.r.squared
@@ -305,11 +317,15 @@ summary(lm.starting.model.4)$adj.r.squared
 summary(lm.full.model.1)$adj.r.squared
 summary(lm.final.model.1)$adj.r.squared
 
+str(d.bike.train)
+str(d.bike.test)
+
+
 for(i in 1:10^2){
   d.bike.train.id <- sample(seq_len(nrow(d.bike)),size = floor(0.75*nrow(d.bike)))
   d.bike.train <- d.bike[d.bike.train.id,]
   d.bike.test <- d.bike[-d.bike.train.id,]
-  
+
   #predict data with starting model 1
   lm.starting.model.1.train <- lm(starting.model.1, data = d.bike.train)
   predicted.starting.model.1.test <- predict(lm.starting.model.1.train,
