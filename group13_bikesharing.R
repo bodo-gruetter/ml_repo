@@ -53,7 +53,7 @@ nrow(d.bike.test)
 ########## EXPLORATIVE ANALYSIS ##########
 
 ## Investigating the Correlation between all predictors
-predictors = c("season", "yr","mnth","hr","holiday","weekday",
+predictors = c("dteday", "season", "yr","mnth","hr","holiday","weekday",
              "workingday","weathersit","temp","atemp","hum","windspeed", "casual", "registered")
 corrplot(cor(data.matrix(d.bike[predictors])))
 
