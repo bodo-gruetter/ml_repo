@@ -428,7 +428,7 @@ mean(r.squared.poi.bike.1)
 ########## UPDATING DATASET FOR CLASSIFICATION ##########
 ##Remove features
 str(d.bike)
-d.bike.new <- subset(d.bike, select=-c(holiday, weekday, workingday, temp, atemp, windspeed, casual, registered))
+d.bike.new <- subset(d.bike, select=-c(holiday, weekday, workingday, windspeed, casual, registered))
 str(d.bike.new)
 
 # build 5 classes 0 to 4 according to the number cnt
