@@ -374,7 +374,7 @@ mean(r.squared.final.model)
 
 ########## REGRESSION ANALYSIS ##########
 ##Linear Regression
-lm.bike.1 <- lm(final.model, data = d.bike)
+lm.bike.1 <- lm(final.model.1, data = d.bike)
 summary(lm.bike.1)
 
 #calculate the Root-mean-squared error
@@ -688,9 +688,9 @@ print(bag.bike)
 yhat.bag = predict(bag.bike,newdata=d.bike.test.new)
 plot(yhat.bag, as.factor(d.bike.test.new$cnt))
 abline(0,1)
-#performance (MSE)
 mean((yhat.bag-d.bike.test.new$cnt)^2)
 
+#performance (MSE)
 ########## Random Forest
 rf.bike=randomForest(cnt~.,data=d.bike.train.new, mtry=6,importance =TRUE)
 
@@ -897,15 +897,79 @@ for (idx in ref_test){
 }
 
 ########## CONCLUSION ##########
+##Compare the models with cross validation (ALL CODE UP TO HERE MUST BE CALCULATED)
+
+for(i in 1:10){
+  d.bike.train.id <- sample(seq_len(nrow(d.bike.new)),size = floor(0.75*nrow(d.bike.new)))
+  d.bike.train.new <- d.bike.new[d.bike.train.id,]
+  d.bike.test.new <- d.bike.new[-d.bike.train.id,]
+  
+  #Linear Regression
+  predicted.lm.bike.1.test <- predict(lm.bike.1.train,
+                                      newdata = d.bike.test.new)
+  r.squared.lm.bike.1 <- cor(predicted.lm.bike.1.test, d.bike.test.new$cnt)^2
+  
+  #Non-linear Regression
+  predicted.gam.bike.1.test <- predict(gam.bike.1.train,
+                                       newdata = d.bike.test.new)
+  r.squared.gam.bike.1 <- cor(predicted.gam.bike.1.test, d.bike.test.new$cnt)^2
+  
+  #Poisson Regression
+  predicted.poi.bike.1.test <- predict(poi.bike.1.train,
+                                       newdata = d.bike.test.new)
+  r.squared.poi.bike.1 <- cor(predicted.poi.bike.1.test, d.bike.test.new$cnt)^2
+  
+  #Regression Tree
+  tree.regression.bike.pruned.test.pred <- predict(tree.regression.bike.pruned, d.bike.test.new, type="vector")
+  (MSE.pruned.test <- mean(((d.bike.test.new["cnt"]-tree.regression.bike.pruned.test.pred)^2)$cnt))
+  (RMSE.pruned.test <- sqrt(MSE.pruned.test))
+  
+  #Bagging
+  yhat.bag = predict(bag.bike,newdata=d.bike.test.new)
+  RMSE.bag <- sqrt(mean((yhat.bag-d.bike.test.new$cnt)^2))
+  
+  #Random Forest
+  
+  #Boosting
+  yhat.boost=predict(boost.bike,newdata=d.bike.test.new, n.trees=1000)
+  RMSE.boost <- sqrt(mean((yhat.boost -d.bike.test.new$cnt)^2))
+
+  #Neural Network
+  
+  
+  #Classification Tree
+  prune.tree.classification.bike.pred.test <- predict(prune.tree.classification.bike,  d.bike.test.new, type="class")
+  (prune.tree.classification.bike.pred.test.ct <- table(prune.tree.classification.bike.pred.test, as.factor(d.bike.test.new$class)))
+  (prune.tree.classification.bike.pred.test.correct <- sum(prune.tree.classification.bike.pred.test==as.factor(d.bike.test.new$class))/sum(prune.tree.classification.bike.pred.test.ct)) 
+  
+  #SVM
+  predict.svm.bike.2.best.test <- predict(svm.bike.2.best, d.bike.test.svm)
+  corrects=sum(predict.svm.bike.2.best.test==d.bike.test.svm$y)
+  errors=sum(predict.svm.bike.2.best.test!=d.bike.test.svm$y)
+  (performance_test=corrects/(corrects+errors))
+}
+
+#RMSE for Regression cases
 lm.bike.1.rmse <- sqrt(mean(lm.bike.1$residuals^2))
 gam.bike.1.rmse <- sqrt(mean(gam.bike.1$residuals^2))
 poi.bike.1.rmse <- sqrt(mean(poi.bike.1$residuals^2))
-
-#regression.tree.rmse <- mean((d.bike.test.new["cnt"]-tree.regression.bike.2.pred)$cnt)
-#classification.tree.rmse <- mean((d.bike.test.new["class"]-tree.classification.bike.pred.test)$class)
-
-bagging.rmse <- mean(yhat.bag-d.bike.test.new$cnt)
+regression.tree.rmse <- mean(RMSE.pruned.test)
+bagging.rmse <- mean(RMSE.bag)
 randomforest.rmse <- NA
-boosting.rmse <- mean(yhat.boost -d.bike.test.new$cnt)
+boosting.rmse <- mean(RMSE.boost)
+neuralnetwork.rmse <- NA
+#Accuracy for Classification
+classification.tree.accuracy <- mean(prune.tree.classification.bike.pred.test.correct)
+svm.accuracy <- mean(performance_test)
 
-#svm.rmse <- rmse(svm.bike.2.best, d.bike.test.svm$y)
+#Output
+lm.bike.1.rmse
+gam.bike.1.rmse
+poi.bike.1.rmse
+regression.tree.rmse
+bagging.rmse
+randomforest.rmse
+boosting.rmse
+neuralnetwork.rmse
+classification.tree.accuracy
+svm.accuracy
