@@ -696,9 +696,6 @@ hist(d.bike.train.new$cnt)
 ```
 
 Only the variables "hr", "yr" and "season" are used to construct the tree. There are only 11 nodes
-```{r}
-summary(tree.example)
-```
 
 ### Bagging
 
