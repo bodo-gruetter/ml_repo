@@ -7,16 +7,17 @@
 
 ########## Import Packages ##########
 library(ggplot2)
-#install.packages("e1071")
-library(e1071)     # for the SVM funtion()
+library(e1071)
 library(mgcv)
-#install.packages("corrplot")
 library(corrplot)
-#install.packages("tree")
 library(tree)
 library(mgcv)
 library(tidyverse)
 library(boot)
+library(MASS)
+library(ipred)
+library(randomForest)
+library(gbm)
 
 ########## Prepare Environment ##########
 # Set seed for reproducability
@@ -464,9 +465,83 @@ str(d.bike.test.new)
 
 
 ########## Decision Trees ##########
-#Classifaction 
+########## Classification Tree
+##Tree Building
+#fit the tree
+tree.classification.bike.1 <- tree(as.factor(class) ~.-cnt, data = d.bike.train.new)
+summary(tree.classification.bike.1)
+#plot the tree
+plot(tree.classification.bike.1)
+text(tree.classification.bike.1, pretty=1, cex=0.75)
 
+#Predict on training data
+tree.classification.bike.pred.train <- predict(tree.classification.bike.1, d.bike.train.new, type="class")
 
+#confusion table with classification error for train data
+(tree.classification.bike.pred.train.ct <- table(tree.classification.bike.pred.train, as.factor(d.bike.train.new$class)))
+tree.classification.bike.pred.train.correct <- 0
+tree.classification.bike.pred.train.error <- 0
+for (i1 in 1:3) {
+  for (i2 in 1:3) {
+    if (i1 == i2) {
+      tree.classification.bike.pred.train.correct <- tree.classification.bike.pred.train.correct + tree.classification.bike.pred.train.ct[i1,i2]
+    }else{
+      tree.classification.bike.pred.train.error <- tree.classification.bike.pred.train.error + tree.classification.bike.pred.train.ct[i1,i2]
+    }
+  }
+}
+(tree.classification.bike.pred.train.rate <- tree.classification.bike.pred.train.correct/sum(tree.classification.bike.pred.train.ct)) 
+(tree.classification.bike.pred.train.error <- 1 - tree.classification.bike.pred.train.rate) 
+
+#Predict on test data
+tree.classification.bike.pred.test <- predict(tree.classification.bike.1, d.bike.test.new, type="class")
+#confusion table with classification error for test data
+(tree.classification.bike.pred.test.ct <- table(tree.classification.bike.pred.test, as.factor(d.bike.test.new$class)))
+tree.classification.bike.pred.test.correct <- 0
+tree.classification.bike.pred.test.error <- 0
+for (i1 in 1:3) {
+  for (i2 in 1:3) {
+    if (i1 == i2) {
+      tree.classification.bike.pred.test.correct <- tree.classification.bike.pred.test.correct + tree.classification.bike.pred.test.ct[i1,i2]
+    }else{
+      tree.classification.bike.pred.test.error <- tree.classification.bike.pred.test.error + tree.classification.bike.pred.test.ct[i1,i2]
+    }
+  }
+}
+(tree.classification.bike.pred.test.rate <- tree.classification.bike.pred.test.correct/sum(tree.classification.bike.pred.test.ct)) 
+(tree.classification.bike.pred.test.error <- 1 - tree.classification.bike.pred.test.rate) 
+
+##Pruning of the classification tree
+tree.classification.bike.pruning <- cv.tree(tree.classification.bike.1, FUN = prune.misclass)
+summary(tree.classification.bike.pruning)
+tree.classification.bike.pruning
+
+# plot the cross-validation error-rate as a function of both size and \alpha (k):
+par(mfrow=c(1,2))
+plot(tree.classification.bike.pruning$size, tree.classification.bike.pruning$dev, type="b") # type="b": plot both, points and lines
+plot(tree.classification.bike.pruning$k, tree.classification.bike.pruning$dev, type="b")
+par(mfrow=c(1,1))
+
+# prune the tree
+prune.tree.classification.bike <- prune.misclass(tree.classification.bike.1, best=6) 
+summary(prune.tree.classification.bike)
+# plot the pruned tree
+plot(prune.tree.classification.bike)
+text(prune.tree.classification.bike,pretty=0)
+
+# use pruned tree to predict on test data
+prune.tree.classification.bike.pred.test <- predict(prune.tree.classification.bike,  d.bike.test.new, type="class")
+
+#confusion table with classification error for pruned tree and test data
+(prune.tree.classification.bike.pred.test.ct <- table(prune.tree.classification.bike.pred.test, as.factor(d.bike.test.new$class)))
+(prune.tree.classification.bike.pred.test.correct <- sum(prune.tree.classification.bike.pred.test==as.factor(d.bike.test.new$class))/sum(prune.tree.classification.bike.pred.test.ct)) 
+(prune.tree.classification.bike.pred.test.error <- 1 - prune.tree.classification.bike.pred.test.correct) 
+#test rate and test error of unpruned tree for comparison
+tree.classification.bike.pred.test.rate
+tree.classification.bike.pred.test.error 
+
+########## Regression Tree
+##Tree Building
 #SET 2
 # let's predict the categorical variable "cnt" (--> factor)
 table(d.bike.train.new$cnt) #Categorical variable --> classification tree
@@ -485,7 +560,6 @@ text(tree.regression.bike, pretty=1, cex=0.75)
 #tree.classification.bike <- tree(as.factor(cnt) ~ .-class, data = d.bike.train.new) 
 #tree.classification.bike.pred <- predict(tree.classification.bike, d.bike.train.new, type="class")
 
-########################## Regression tree analysis starts #############
 #classification did not work because at most 32 levels are possible. cnt has more than 1000 levels
 #instead regression tree is to be used
 tree.regression.bike.pred <- predict(tree.regression.bike, d.bike.train.new, type="vector")
@@ -551,14 +625,43 @@ ggplot(data = errors.2_dataframe, mapping = aes(x = ID,y = error, color = type))
   geom_point() + geom_boxplot(alpha = 0.5)
 
 
-#Pruning
+##Pruning
 
-#Bagging
+########## Bagging
+bag.bike=bagging(cnt~.-class, data=d.bike.train.new, nbagg=25, coob =TRUE)
+print(bag.bike)
 
-#Random Forest
+#predict on test set
+yhat.bag = predict(bag.bike,newdata=d.bike.test.new)
+plot(yhat.bag, as.factor(d.bike.test.new$cnt))
+abline(0,1)
+#performance (MSE)
+mean((yhat.bag-d.bike.test.new$cnt)^2)
 
-#Boosting
+########## Random Forest
+rf.bike=randomForest(cnt~.,data=d.bike.train.new, mtry=6,importance =TRUE)
 
+#predict on test set
+yhat.rf = predict(rf.bike ,newdata=d.bike.test.new)
+
+#performance (MSE)
+mean((yhat.rf-d.bike.test.new$class)^2)
+importance(rf.bike)
+varImpPlot (rf.bike)
+
+########## Boosting
+boost.bike=gbm(cnt~.-class,data=d.bike.train.new,
+               distribution="poisson",n.trees=1000, interaction.depth=4)
+summary(boost.bike)
+
+# Producing partial dependence plots for the two most important attributes hr and yr
+plot(boost.bike ,i="hr") 
+plot(boost.bike ,i="yr")
+
+# Predict on test set
+yhat.boost=predict(boost.bike,newdata=d.bike.test.new, n.trees=1000)
+#performance (MSE)
+mean((yhat.boost -d.bike.test.new$cnt)^2)
 
 ########## SVM ##########
 ##### Linear SVM with casual and atemp

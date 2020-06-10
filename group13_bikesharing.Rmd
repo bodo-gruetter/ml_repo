@@ -15,6 +15,12 @@ library(mgcv)
 library(corrplot)
 library(tree)
 library(mgcv)
+library(tidyverse)
+library(boot)
+library(MASS)
+library(ipred)
+library(randomForest)
+library(gbm)
 ```
 
 ```{r message=FALSE, include=FALSE}
