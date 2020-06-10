@@ -1110,9 +1110,7 @@ displayDigit(d.bike.new[ref,-1])
 set.seed(13)
 training <- d.bike.train.new[,-1]
 test <- d.bike.test.new
-test
 test_total <- d.bike.new
-test_total
 
 h2o.init()
 train_hf <- as.h2o(training)
@@ -1122,18 +1120,18 @@ model_dl <- h2o.deeplearning(y = 4, training_frame = train_hf, nfolds = 10, seed
 
 # prediction on TRAIN
 predicted_h20_deep_neural_network_probabilites_train <- h2o.predict(model_dl, train_hf)
-#table( as.data.frame(predicted_h20_deep_neural_network_probabilites_train$predict))
+table( as.data.frame(predicted_h20_deep_neural_network_probabilites_train$predict))
 predicted_h20_deep_neural_network_class_train <- as.data.frame(predicted_h20_deep_neural_network_probabilites_train$predict)
-#table(training$cnt, predicted_h20_deep_neural_network_class_train[,1])
+table(training$cnt, predicted_h20_deep_neural_network_class_train[,1])
 predicted_h20_deep_neural_network_performance_train <- mean(predicted_h20_deep_neural_network_class_train[,1] == training$cnt)*100
 print(paste('training accuracy: ',predicted_h20_deep_neural_network_performance_train,"%"))
 
 #prediction on TEST
 test_hf <- as.h2o(test)
 predicted_h20_deep_neural_network_probabilites_test <- h2o.predict(model_dl, test_hf)
-#table( as.data.frame(predicted_h20_deep_neural_network_probabilites_test$predict))
+table( as.data.frame(predicted_h20_deep_neural_network_probabilites_test$predict))
 predicted_h20_deep_neural_network_class_test <- as.data.frame(predicted_h20_deep_neural_network_probabilites_test$predict)
-#table(test$cnt, as.integer(predicted_h20_deep_neural_network_class_test[,1]))
+table(test$cnt, as.integer(predicted_h20_deep_neural_network_class_test[,1]))
 predicted_h20_deep_neural_network_performance_test <- mean(predicted_h20_deep_neural_network_class_test[,1] == test$cnt)*100
 print(paste('test accuracy: ',predicted_h20_deep_neural_network_performance_test,"%"))
 
