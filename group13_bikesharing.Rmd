@@ -724,7 +724,7 @@ mean((yhat.bag-d.bike.test.new$cnt)^2)
 The calculation of the MSE from the forecast confirms this a second time.
 
 ### Random Forest
-
+At this time Random Forest could not be executed for unknown reasons. The process kept getting hung up.
 
 ### Boosting
 In this section Boosting will be used to improve the model. Since our data set is count data, we choose the Poisson distribution. The number of trees to be generated in boosting is set to 1000.
@@ -750,7 +750,7 @@ yhat.boost=predict(boost.bike,newdata=d.bike.test.new, n.trees=1000)
 mean((yhat.boost -d.bike.test.new$cnt)^2)
 ```
 
-The MSE is very high at 66442. About thirty times as high as in the example of bagging (see Bagging).
+The MSE is very high at 66442. About thirty times as high as in the example of bagging (see Bagging). Adjustments to the shrinkage parameter have no great effect (see line 668, group13_bikesharing.R).
 
 ## 5. Support Vector Machines
 The fifth chapter deals with the classification of data using Support Vector Machines (SVM). Two SVMs are trained and tested. In the first case, the data is classified into two classes using SVM with two predictors. In the second case, the data is classified in five classes using the final model.
