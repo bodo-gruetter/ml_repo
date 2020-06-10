@@ -845,8 +845,56 @@ corrects=sum(predict.svm.bike.2.best.test==d.bike.test.svm$y)
 errors=sum(predict.svm.bike.2.best.test!=d.bike.test.svm$y)
 (performance_test=corrects/(corrects+errors))
 
-########## NEURONAL NETWORK ##########
+#################### NEURONAL NETWORK ###########################
+#This last chapter shows the.... //Todo Text
 
+# set.seed(321)
+# (ref=sample(1:dim(d.bike.new)[1], 1, replace=F))
+# displayDigit(d.bike.new[ref,-1])
+
+set.seed(10)
+training <- d.bike.train.new[,-1]
+#training <- d.bike.train.new
+test <- d.bike.test.new
+test
+test_total <- d.bike.new
+test_total
+
+h2o.init()
+train_hf <- as.h2o(training)
+set.seed(100)
+
+model_dl <- h2o.deeplearning(y = 4, training_frame = train_hf, nfolds = 5, seed=250, verbose = F)
+
+# now make a prediction on TRAIN
+predicted_h20_deep_neural_network_probabilites_train <- h2o.predict(model_dl, train_hf)
+table( as.data.frame(predicted_h20_deep_neural_network_probabilites_train$predict))
+predicted_h20_deep_neural_network_class_train <- as.data.frame(predicted_h20_deep_neural_network_probabilites_train$predict)
+training
+table(training$cnt, predicted_h20_deep_neural_network_class_train[,1])
+predicted_h20_deep_neural_network_performance_train <- mean(predicted_h20_deep_neural_network_class_train[,1] == training$cnt)*100
+print(paste('training accuracy: ',predicted_h20_deep_neural_network_performance_train,"%"))
+
+# now make a prediction on TEST
+test_hf <- as.h2o(test)
+predicted_h20_deep_neural_network_probabilites_test <- h2o.predict(model_dl, test_hf)
+table( as.data.frame(predicted_h20_deep_neural_network_probabilites_test$predict))
+predicted_h20_deep_neural_network_class_test <- as.data.frame(predicted_h20_deep_neural_network_probabilites_test$predict)
+
+table(test$cnt, as.integer(predicted_h20_deep_neural_network_class_test[,1]))
+predicted_h20_deep_neural_network_performance_test <- mean(predicted_h20_deep_neural_network_class_test[,1] == test$cnt)*100
+print(paste('test accuracy: ',predicted_h20_deep_neural_network_performance_test,"%"))
+
+set.seed(321)
+(ref_test=sample(1:dim(test)[1], 20, replace=F))
+for (idx in ref_test){
+  real_class =test[idx,1]
+  prediction = predicted_h20_deep_neural_network_class_test[idx,1]
+  correct = (as.integer(real_class)==as.integer(prediction))
+  print(paste('Index ',idx,' class: ',(as.integer(real_class)-1)," --> predicted: ",prediction," [correct = ",correct,"]"))
+  #displayDigit(test_total[idx,-1])
+  i <- readline(prompt="Press [enter] to continue")
+}
 
 ########## CONCLUSION ##########
 lm.bike.1.rmse <- sqrt(mean(lm.bike.1$residuals^2))
