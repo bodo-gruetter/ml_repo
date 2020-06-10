@@ -630,8 +630,8 @@ ggplot(data = errors.2_dataframe, mapping = aes(x = ID,y = error, color = type))
 
 
 # pruning of regression tree:
-# The average deviation is influenced by the number of leaves. 
-# Up to four leaves the deviation decreases significantly. From then on the the deviance becomes stable
+# The average deviance is influenced by the number of leaves. 
+# Up to four leaves the deviance decreases significantly. From then on the the deviance becomes stable
 # See graphic: 
 tree.regression.bike.pruning = cv.tree(tree.regression.bike, FUN = prune.tree)
 plot(tree.regression.bike.pruning)
@@ -647,7 +647,7 @@ plot(tree.regression.bike.pruning$k, tree.regression.bike.pruning$dev, type="b")
 par(mfrow=c(1,1))
 
 # Based on the findings above, the tree was created once with 4 and once with 5 nodes. 
-# With the tree with 5 nodes, the goal was to find out whether the expected lower mean deviation would allow a better tree.
+# With the tree with 5 nodes, the goal was to find out whether the expected lower mean deviance would allow a better tree.
 # Result: Both trees (generated below) are good, none of them has unnecessary decisions. 
 # see graphic of trees:
 
