@@ -546,7 +546,11 @@ tree.classification.bike.pred.test.error
 table(d.bike.train.new$cnt) 
 
 #"cnt" is a categorical variable -> normally classification tree is to be used. 
-#...but since it has more than 32 levels, regression tree is generated
+#...but since it has more than 32 levels, regression tree is generated 
+
+##Proof: classification did not work with "cnt" because at most 32 levels are possible. cnt has more than 1000 levels...
+#tree.classification.bike <- tree(as.factor(cnt) ~ .-class, data = d.bike.train.new) 
+#tree.classification.bike.pred <- predict(tree.classification.bike, d.bike.train.new, type="class")
 
 #regression tree is generated
 tree.regression.bike <- tree(cnt ~ .-class, data = d.bike.train.new) 
@@ -557,16 +561,12 @@ text(tree.regression.bike, pretty=1, cex=0.75)
 summary(tree.regression.bike)
 
 
-##Proof: classification did not work with "cnt" because at most 32 levels are possible. cnt has more than 1000 levels...
-#tree.classification.bike <- tree(as.factor(cnt) ~ .-class, data = d.bike.train.new) 
-#tree.classification.bike.pred <- predict(tree.classification.bike, d.bike.train.new, type="class")
-
-
 # ....regression tree is used for prediction
 # prediction is made based on training data
 tree.regression.bike.train.pred <- predict(tree.regression.bike, d.bike.train.new, type="vector")
 
 # predictions of regression tree with true "cnt" values are compared. it shows a positive correlation
+# see graphic: 
 plot(tree.regression.bike.train.pred,d.bike.train.new$cnt)
 abline (0 ,1) # compare with the function f(x)=x (intercept 0, slope 1)
 
@@ -575,18 +575,16 @@ error <- tree.regression.bike.train.pred-d.bike.train.new$cnt
 element_ID <- 1:length(error)
 
 # Analysis of the resuduals: The majority of the residents are within the frequency of 200
+# see graphic:
 plot(element_ID,error)
 title(main="Analysis of the residuals")
 abline(0 ,0, lwd=5, col="skyblue", lty="dotted")
 abline(200 ,0, lwd=5, col="red", lty="dotted")
 abline(-200 ,0, lwd=5, col="red", lty="dotted")
 
-## error data frame plot: errors are all 
-#error_dataframe <- tibble(element_ID,error)
-#ggplot(data=error_dataframe) + geom_boxplot(aes(y=error))
-
 # Histogram of error: Most errors do not seem to be over 200 up and down (as already seen in the residence analysis above).
 # The errors appear to be bell shaped.
+# see graphic: 
 hist(error)
 
 # some numbers on train data
@@ -600,18 +598,21 @@ hist(error)
 # a prediction is made based on test data
 tree.regression.bike.test.pred <- predict(tree.regression.bike, d.bike.test.new, type="vector")
 
-# MSE
+# MSE:
 # An MSE comparison is made between train and test data. 
 # As usual, the MSE of test data is higher - but in this case only slightly higher, 
 # which shows a very good performance of the decision tree.
+# MSE of training data: 10728.37
+# MSE of test data: 10889.61
+# Difference: 161.24
 
 (MSE.train <- mean(((d.bike.train.new["cnt"]-tree.regression.bike.train.pred)^2)$cnt))
 (MSE.test <- mean(((d.bike.test.new["cnt"]-tree.regression.bike.test.pred)^2)$cnt))
 
-# Graphical comparison of error residuals between training and test data
-# result: As one can see in the graph, the distribution of error rates between training and 
-# test data looks the same --> good performance of the decision tree!
-
+# Graphical comparison of error residuals between training and test data:
+# result: As one can see in the graph, the distribution of error rates between training and ...
+# ... test data looks the same --> good performance of the decision tree!
+# see graphic: 
 errors.2.in <- predict(tree.regression.bike, d.bike.train.new, type="vector")-d.bike.train.new$cnt
 element.2.in <- as.integer(names(errors.2.in))
 errors.2.in_dataframe <- tibble(element.2.in,errors.2.in,"TRAIN")
@@ -628,9 +629,10 @@ ggplot(data = errors.2_dataframe, mapping = aes(x = ID,y = error, color = type))
   geom_point() + geom_boxplot(alpha = 0.5)
 
 
-#pruning for regression tree:
+# pruning of regression tree:
 # The average deviation is influenced by the number of leaves. 
 # Up to four leaves the deviation decreases significantly. From then on the the deviance becomes stable
+# See graphic: 
 tree.regression.bike.pruning = cv.tree(tree.regression.bike, FUN = prune.tree)
 plot(tree.regression.bike.pruning)
 
@@ -638,6 +640,7 @@ plot(tree.regression.bike.pruning)
 # In the left graphic below one can see again, that from the 4th node on, the curve flattens out.
 # On the right side, one can see that after 5.0e+0.7 k, the curve flattens out. 
 # --> On this level the number of leaves should be chosen.
+# see both graphics:
 par(mfrow=c(1,2))
 plot(tree.regression.bike.pruning$size, tree.regression.bike.pruning$dev, type="b")
 plot(tree.regression.bike.pruning$k, tree.regression.bike.pruning$dev, type="b")
@@ -645,7 +648,8 @@ par(mfrow=c(1,1))
 
 # Based on the findings above, the tree was created once with 4 and once with 5 nodes. 
 # With the tree with 5 nodes, the goal was to find out whether the expected lower mean deviation would allow a better tree.
-# Result: Both trees below are good, none of them has unnecessary decisions. 
+# Result: Both trees (generated below) are good, none of them has unnecessary decisions. 
+# see graphic of trees:
 
 # Tree with 4 nodes
 tree.regression.bike.pruned <- prune.tree(tree.regression.bike, best = 5)
@@ -657,16 +661,18 @@ tree.regression.bike.pruned2 <- prune.tree(tree.regression.bike, best = 4)
 plot(tree.regression.bike.pruned2)
 text(tree.regression.bike.pruned2, pretty=1, cex=0.75)
 
-# Summary of both trees - to get to know what the mean deviance is
-# Here one can also see that only the dimensions "hr" and "temp" are used in both trees after the prune.
+# Summary of both trees: shows the mean deviance
+# mean deviance of tree with 5 leaves ("tree.regression.bike.pruned"): 14490
+# mean deviance of tree with 4 leaves ("tree.regression.bike.pruned2"): 15830
+# For the further part of the residual tree analysis (only within this section), the tree with five nodes ...
+# ... is to be preferred, since it has a lower mean deviance.
+# sidenote: in the summary of the trees, one can also see that only the dimensions "hr" and "temp" are used in both trees after the prune.
 summary(tree.regression.bike.pruned)
 summary(tree.regression.bike.pruned2)
 
 
-# For the further course of the residual tree analysis (only within this section), the tree with five nodes 
-# is to be preferred, since it has a lower mean deviation.
 # Next was about prediction tests on the recently pruned tree with five nodes. 
-# Result: With train data we came to an MSE of 14488.46  and with test data to 14824.47 . 
+# Result: With train data we came to an MSE of 14488.46  and with test data to 14824.47 (difference. 
 # --> This shows a very good performance of the tree.
 tree.regression.bike.pruned.train.pred <- predict(tree.regression.bike.pruned, d.bike.train.new, type="vector")
 (MSE.pruned.train <- mean(((d.bike.train.new["cnt"]-tree.regression.bike.pruned.train.pred)^2)$cnt))
