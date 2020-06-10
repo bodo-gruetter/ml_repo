@@ -588,9 +588,9 @@ abline(-200 ,0, lwd=5, col="red", lty="dotted")
 hist(error)
 
 # some numbers on train data
-# RSS: 141337474
-# MSE: 10843.75
-# deviation: 104.1333
+# RSS: 146263805
+# MSE: 11221.71
+# deviation: 105.9326
 (RSS <- sum((d.bike.train.new["cnt"]-tree.regression.bike.train.pred)^2))
 (MSE <- mean(((d.bike.train.new["cnt"]-tree.regression.bike.train.pred)^2)$cnt))
 (deviation <- sqrt(MSE))
@@ -600,11 +600,9 @@ tree.regression.bike.test.pred <- predict(tree.regression.bike, d.bike.test.new,
 
 # MSE:
 # An MSE comparison is made between train and test data. 
-# As usual, the MSE of test data is higher - but in this case only slightly higher, 
-# which shows a very good performance of the decision tree.
-# MSE of training data: 10728.37
-# MSE of test data: 10889.61
-# Difference: 161.24
+# Both MSE-values are very close to each other and this shows a very good performance of the tree.
+# MSE of training data: 11221.71
+# MSE of test data: 10638.24
 
 (MSE.train <- mean(((d.bike.train.new["cnt"]-tree.regression.bike.train.pred)^2)$cnt))
 (MSE.test <- mean(((d.bike.test.new["cnt"]-tree.regression.bike.test.pred)^2)$cnt))
@@ -662,8 +660,8 @@ plot(tree.regression.bike.pruned2)
 text(tree.regression.bike.pruned2, pretty=1, cex=0.75)
 
 # Summary of both trees: shows the mean deviance
-# mean deviance of tree with 5 leaves ("tree.regression.bike.pruned"): 14490
-# mean deviance of tree with 4 leaves ("tree.regression.bike.pruned2"): 15830
+# mean deviance of tree with 5 leaves ("tree.regression.bike.pruned"): 14790
+# mean deviance of tree with 4 leaves ("tree.regression.bike.pruned2"): 16100
 # For the further part of the residual tree analysis (only within this section), the tree with five nodes ...
 # ... is to be preferred, since it has a lower mean deviance.
 # sidenote: in the summary of the trees, one can also see that only the dimensions "hr" and "temp" are used in both trees after the prune.
@@ -672,8 +670,8 @@ summary(tree.regression.bike.pruned2)
 
 
 # Next was about prediction tests on the recently pruned tree with five nodes. 
-# Result: With train data we came to an MSE of 14488.46  and with test data to 14824.47 (difference. 
-# --> This shows a very good performance of the tree.
+# Result: With train data we came to an MSE of 14785.88  and with test data to 14245.44. 
+# --> These two values are very close to each other and this shows a very good performance of the tree.
 tree.regression.bike.pruned.train.pred <- predict(tree.regression.bike.pruned, d.bike.train.new, type="vector")
 (MSE.pruned.train <- mean(((d.bike.train.new["cnt"]-tree.regression.bike.pruned.train.pred)^2)$cnt))
 
@@ -691,14 +689,28 @@ abline(0,1)
 mean((yhat.bag-d.bike.test.new$cnt)^2)
 
 #performance (MSE)
-########## Random Forest
-rf.bike=randomForest(cnt~.,data=d.bike.train.new, mtry=6,importance =TRUE)
 
-#predict on test set
+########## Random Forest
+#In this section the random forest method is used for the already discussed analysis. 
+#However, here the "class" variable is used as the target value instead of the "cnt" variable. 
+#The random forest function could not handle cnt because it has too many levels (see https://stats.stackexchange.com/questions/37370/random-forest-computing-time-in-r) . 
+#Mtry is set to 6 for this anlysis.
+#The aim of this analysis is to calculate an MSE value again and to investigate the importance of the individual explaining variables.
+
+#run the initial function:
+
+rf.bike=randomForest(as.numeric(as.character(class)) ~ .-cnt,data=d.bike.train.new, mtry=6,importance =TRUE)
+
+# predict on test set
 yhat.rf = predict(rf.bike ,newdata=d.bike.test.new)
 
-#performance (MSE)
+#p erformance (MSE)
+# the mse is at 0.273
 mean((yhat.rf-d.bike.test.new$class)^2)
+
+# With the two masses "increase of MSE" in percent and "inrease in node purity" ...
+# ... it can be seen that hr is by far the most important parameter. 
+# This can be seen in the table and graphic below 
 importance(rf.bike)
 varImpPlot (rf.bike)
 
