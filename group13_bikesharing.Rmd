@@ -24,6 +24,10 @@ library(ipred)
 library(randomForest)
 library(gbm)
 library(modelr)
+library(neuralnet)
+library(h2o)
+library(bit64)
+library(caret)
 ```
 
 ```{r message=FALSE, include=FALSE}
@@ -1090,6 +1094,58 @@ errors=sum(predict.svm.bike.2.best.test!=d.bike.test.svm$y)
 The same result is shown on the test data set. The data is correctly classified using a new data set. An SVM can make good predictions for the two classification problems presented and the selected data set.
 
 # 6. Neural Networks
+This last chapter creats the neuronal network prediction model train and test. 
+
+```{r}
+displayDigit <- function(X){
+  m <- matrix(unlist(X),nrow = 28,byrow = T)
+  m <- t(apply(m, 2, rev))
+  image(m,col=grey.colors(255))
+}
+
+set.seed(400)
+(ref=sample(1:dim(d.bike.new)[1], 1, replace=F))
+displayDigit(d.bike.new[ref,-1])
+
+set.seed(13)
+training <- d.bike.train.new[,-1]
+test <- d.bike.test.new
+test_total <- d.bike.new
+
+h2o.init()
+train_hf <- as.h2o(training)
+set.seed(105)
+
+model_dl <- h2o.deeplearning(y = 4, training_frame = train_hf, nfolds = 10, seed=500, verbose = F)
+
+# prediction on TRAIN
+predicted_h20_deep_neural_network_probabilites_train <- h2o.predict(model_dl, train_hf)
+table( as.data.frame(predicted_h20_deep_neural_network_probabilites_train$predict))
+predicted_h20_deep_neural_network_class_train <- as.data.frame(predicted_h20_deep_neural_network_probabilites_train$predict)
+table(training$cnt, predicted_h20_deep_neural_network_class_train[,1])
+predicted_h20_deep_neural_network_performance_train <- mean(predicted_h20_deep_neural_network_class_train[,1] == training$cnt)*100
+print(paste('training accuracy: ',predicted_h20_deep_neural_network_performance_train,"%"))
+
+#prediction on TEST
+test_hf <- as.h2o(test)
+predicted_h20_deep_neural_network_probabilites_test <- h2o.predict(model_dl, test_hf)
+table( as.data.frame(predicted_h20_deep_neural_network_probabilites_test$predict))
+predicted_h20_deep_neural_network_class_test <- as.data.frame(predicted_h20_deep_neural_network_probabilites_test$predict)
+table(test$cnt, as.integer(predicted_h20_deep_neural_network_class_test[,1]))
+predicted_h20_deep_neural_network_performance_test <- mean(predicted_h20_deep_neural_network_class_test[,1] == test$cnt)*100
+print(paste('test accuracy: ',predicted_h20_deep_neural_network_performance_test,"%"))
+
+set.seed(400)
+(ref_test=sample(1:dim(test)[1], 4, replace=F))
+for (idx in ref_test){
+  real_class =test[idx,1]
+  prediction = predicted_h20_deep_neural_network_class_test[idx,1]
+  correct = (as.integer(real_class)==as.integer(prediction))
+  print(paste('Index ',idx,' class: ',(as.integer(real_class)-1)," --> predicted: ",prediction," [correct = ",correct,"]"))
+  displayDigit(test_total[idx,-1])
+  i <- readline(prompt="Press [enter] to continue")
+}
+```
 
 # 7. Conclusion
 The purpose of this chapter is to compare all the models that have been used in this work to analyze and predict bike rentals. The RMSE is used as comparison value respectively measure of fit. To guarantee the fairness of the comparison, a 10-fold cross validation is applied.
