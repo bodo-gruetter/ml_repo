@@ -698,8 +698,33 @@ hist(d.bike.train.new$cnt)
 Only the variables "hr", "yr" and "season" are used to construct the tree. There are only 11 nodes
 
 ### Bagging
+In this section, the bagging shall be performed on the regression tree model to reduce the variance. As y-variable not the class is used but cnt. The number of Bootstrap replication is set to 25. It should no cross validation be used as set with parameter coob.
+
+```{r}
+bag.bike=bagging(cnt~.-class, data=d.bike.train.new, nbagg=25, coob =TRUE)
+print(bag.bike)
+```
+
+The root mean squared error (RMSE) is 51.1286. The mean squared error (MSE) is therefore about 2614.
+
+Now prediction is to be performed by means of bagging on the test set. The result is plotted.
+
+```{r}
+yhat.bag = predict(bag.bike,newdata=d.bike.test.new)
+plot(yhat.bag, as.factor(d.bike.test.new$cnt))
+abline(0,1)
+```
+
+The graphic representation shows us what the MSE has already shown us. The deviation from the estimate (straight line) and thus the variance is large.
+
+```{r}
+mean((yhat.bag-d.bike.test.new$cnt)^2)
+```
+
+The calculation of the MSE from the forecast confirms this a second time.
 
 ### Random Forest
+
 
 ### Boosting
 
