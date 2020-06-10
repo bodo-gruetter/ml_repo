@@ -18,6 +18,7 @@ library(MASS)
 library(ipred)
 library(randomForest)
 library(gbm)
+library(modelr)
 
 ########## Prepare Environment ##########
 # Set seed for reproducability
@@ -769,6 +770,7 @@ tune.out <- tune(
   data = d.bike.train.svm,
   kernel = "linear",
   ranges = list(cost = cost_range),
+  metric = "RMSE",
   scale = FALSE
   )
 summary(tune.out)
@@ -794,3 +796,18 @@ errors=sum(predict.svm.bike.2.best.test!=d.bike.test.svm$y)
 (performance_test=corrects/(corrects+errors))
 
 ########## NEURONAL NETWORK ##########
+
+
+########## CONCLUSION ##########
+lm.bike.1.rmse <- sqrt(mean(lm.bike.1$residuals^2))
+gam.bike.1.rmse <- sqrt(mean(gam.bike.1$residuals^2))
+poi.bike.1.rmse <- sqrt(mean(poi.bike.1$residuals^2))
+
+#regression.tree.rmse <- mean((d.bike.test.new["cnt"]-tree.regression.bike.2.pred)$cnt)
+#classification.tree.rmse <- mean((d.bike.test.new["class"]-tree.classification.bike.pred.test)$class)
+
+bagging.rmse <- mean(yhat.bag-d.bike.test.new$cnt)
+randomforest.rmse <- NA
+boosting.rmse <- mean(yhat.boost -d.bike.test.new$cnt)
+
+#svm.rmse <- rmse(svm.bike.2.best, d.bike.test.svm$y)
