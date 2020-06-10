@@ -665,6 +665,15 @@ yhat.boost=predict(boost.bike,newdata=d.bike.test.new, n.trees=1000)
 #performance (MSE)
 mean((yhat.boost -d.bike.test.new$cnt)^2)
 
+# Updating shrinkage
+boost.bike=gbm(cnt~.-class,data=d.bike.train.new,distribution="poisson",n.trees=1000, interaction.depth=4,shrinkage = 0.02, verbose = F)
+yhat.boost=predict(boost.bike,newdata = d.bike.test.new, n.trees=1000)
+mean((yhat.boost -d.bike.test.new$cnt)^2)
+
+boost.bike=gbm(cnt~.-class,data=d.bike.train.new,distribution="poisson",n.trees=1000, interaction.depth=4,shrinkage = 0.2, verbose = F)
+yhat.boost=predict(boost.bike,newdata = d.bike.test.new, n.trees=1000)
+mean((yhat.boost -d.bike.test.new$cnt)^2)
+
 ########## SVM ##########
 ##### Linear SVM with casual and atemp
 ggplot(data = d.bike, mapping = aes(y = casual, x = atemp)) + geom_point()

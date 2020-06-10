@@ -727,6 +727,30 @@ The calculation of the MSE from the forecast confirms this a second time.
 
 
 ### Boosting
+In this section Boosting will be used to improve the model. Since our data set is count data, we choose the Poisson distribution. The number of trees to be generated in boosting is set to 1000.
+```{r}
+boost.bike=gbm(cnt~.-class,data=d.bike.train.new,
+               distribution="poisson",n.trees=1000, interaction.depth=4)
+summary(boost.bike)
+```
+
+By far the most important attribute is hr. As the result shows the attributes yr and temp are also important. This is not surprising, since the tree developed in the section "Classification Tree" was already based on these three attributes.
+
+```{r}
+plot(boost.bike ,i="hr") 
+plot(boost.bike ,i="yr")
+```
+
+The graphical representation of the two most important variables hr and yr shows a clear effect on cnt. The cnt is different in the individual hours as well as in the two years.
+
+A prediction is performed to check performance on the test data record. As in the previous examples, performance is assessed using MSE.
+
+```{r}
+yhat.boost=predict(boost.bike,newdata=d.bike.test.new, n.trees=1000)
+mean((yhat.boost -d.bike.test.new$cnt)^2)
+```
+
+The MSE is very high at 66442. About thirty times as high as in the example of bagging (see Bagging).
 
 ## 5. Support Vector Machines
 The fifth chapter deals with the classification of data using Support Vector Machines (SVM). Two SVMs are trained and tested. In the first case, the data is classified into two classes using SVM with two predictors. In the second case, the data is classified in five classes using the final model.
