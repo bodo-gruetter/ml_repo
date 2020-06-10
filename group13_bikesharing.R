@@ -541,79 +541,81 @@ tree.classification.bike.pred.test.rate
 tree.classification.bike.pred.test.error 
 
 ########## Regression Tree
-##Tree Building
-#SET 2
-# let's predict the categorical variable "cnt" (--> factor)
-table(d.bike.train.new$cnt) #Categorical variable --> classification tree
-#train data comes in
+# in this section the variable "cnt" will be predicted (--> factor)
+table(d.bike.train.new$cnt) 
+
+#"cnt" is a categorical variable -> normally classification tree is to be used. 
+#...but since it has more than 32 levels, regression tree is generated
+
+#regression tree is generated
 tree.regression.bike <- tree(cnt ~ .-class, data = d.bike.train.new) 
-
-summary(tree.regression.bike)
-# Output:
-#   - There are 11 terminal nodes (leaves) of the tree.
-#   - Here "residual mean deviance" is just mean squared error: we have an RMS error of 0.66 and an misclassification rate of 15%.
-
 plot(tree.regression.bike)
 text(tree.regression.bike, pretty=1, cex=0.75)
 
-##let's do some predictions, on the data already used for the training --> training error
+#tree has 10 nodes
+summary(tree.regression.bike)
+
+
+##Proof: classification did not work with "cnt" because at most 32 levels are possible. cnt has more than 1000 levels...
 #tree.classification.bike <- tree(as.factor(cnt) ~ .-class, data = d.bike.train.new) 
 #tree.classification.bike.pred <- predict(tree.classification.bike, d.bike.train.new, type="class")
 
-#classification did not work because at most 32 levels are possible. cnt has more than 1000 levels
-#instead regression tree is to be used
+
+# ....regression tree is used for prediction
+# prediction is made based on training data
 tree.regression.bike.pred <- predict(tree.regression.bike, d.bike.train.new, type="vector")
 
-# compare predictions of regression tree with true values (visually)
+# predictions of regression tree with true "cnt" values are compared. it shows a positive correlation
 plot(tree.regression.bike.pred,d.bike.train.new$cnt)
 abline (0 ,1) # compare with the function f(x)=x (intercept 0, slope 1)
 
+# errors are calculated (error residual calculation: [predicted "cnt" values] - [real "cnt" values])
 error <- tree.regression.bike.pred-d.bike.train.new$cnt
 element_ID <- 1:length(error)
+
+# Analysis of the resuduals: The majority of the residents are within the frequency of 200
 plot(element_ID,error)
 title(main="Analysis of the residuals")
-abline(0 ,0, lwd=5,lty="dotted")
-abline(1.66 ,0, lwd=2, col="red", lty="dotted")
-abline(-1.66 ,0, lwd=2, col="red", lty="dotted")
+abline(0 ,0, lwd=5, col="skyblue", lty="dotted")
+abline(200 ,0, lwd=5, col="red", lty="dotted")
+abline(-200 ,0, lwd=5, col="red", lty="dotted")
 
 
 error_dataframe <- tibble(element_ID,error)
 ggplot(data=error_dataframe) + geom_boxplot(aes(y=error))
+
+# Histogram of error: Most errors do not seem to be over 200 up and down (as already seen in the residence analysis above).
+# The errors appear to be bell shaped.
 hist(error)
-head(d.bike.train.new[7])
-(RSS <- sum((d.bike.train.new[7]-tree.regression.bike.pred)^2))
-(MSE <- RSS/length(tree.regression.bike.pred))
-(MSE <- mean(((d.bike.train.new[7]-tree.regression.bike.pred)^2)$cnt,na.rm = TRUE)) # MSE = 12448.83
-(deviation <- sqrt(MSE)) # square root of the MSE = 1.65993 (in thousand of units)
-# average error on each estimation : within about 1660 units sold from the true median
-plot(element_ID,error)
-title(main="Analysis of the residuals (with average)")
-abline(0 ,0, lwd=3,lty="dotted")
-abline(1.66 ,0, lwd=2, col="red", lty="longdash")
-abline(-1.66 ,0, lwd=2, col="red", lty="longdash")
 
-#let's add a manual split in train/test for the dataset (70/30)
-#this will show the overfitting effect: very evident in fully growt (unpruned) tree
-ratio <- 0.7
-total <- nrow(d.bike.train.new)
+# some numbers on train data
+# RSS: 141337474
+# MSE: 10843.75
+# deviation: 104.1333
+(RSS <- sum((d.bike.train.new["cnt"]-tree.regression.bike.pred)^2))
+(MSE <- mean(((d.bike.train.new["cnt"]-tree.regression.bike.pred)^2)$cnt))
+(deviation <- sqrt(MSE))
 
-train <- sample(1:total, as.integer(total * ratio))
-
-
+# a prediction is made based on test data
 tree.regression.bike.2.pred <- predict(tree.regression.bike, d.bike.test.new, type="vector")
-# --> for documentation, use the predict.tree help (from the tree package) --> help(predict.tree)
 
-#let's check the cumulated squared error --> RSS
-(RSS.2.in <- mean(((d.bike.train.new["cnt"]-predict(tree.regression.bike, d.bike.train.new, type="vector"))^2)$cnt))
-(RSS.2 <- mean(((d.bike.test.new["cnt"]-tree.regression.bike.2.pred)^2)$cnt))
+# MSE
+# An MSE comparison is made between train and test data. 
+# As usual, the MSE of test data is higher - but in this case only slightly higher, 
+# which shows a very good performance of the decision tree.
+
+(MSE.train <- mean(((d.bike.train.new["cnt"]-tree.regression.bike.pred)^2)$cnt))
+(MSE.test <- mean(((d.bike.test.new["cnt"]-tree.regression.bike.2.pred)^2)$cnt))
+
+# Graphical comparison of error residuals between training and test data
+# result: As one can see in the graph, the distribution of error rates between training and 
+# test data looks the same --> good performance of the decision tree!
 
 errors.2.in <- predict(tree.regression.bike.2, d.bike.train.new, type="vector")-d.bike.train.new$cnt
-#element.2.in <- 1:length(errors.2.in)
 element.2.in <- as.integer(names(errors.2.in))
 errors.2.in_dataframe <- tibble(element.2.in,errors.2.in,"TRAIN")
 colnames(errors.2.in_dataframe) <- c('ID','error','type')
 errors.2 <- predict(tree.regression.bike.2, d.bike.test.new, type="vector")-d.bike.test.new$cnt
-#element.2 <- 1:length(errors.2)
 element.2 <- as.integer(names(errors.2))
 errors.2.out_dataframe <- tibble(element.2,errors.2,"TEST")
 colnames(errors.2.out_dataframe) <- c('ID','error','type')
