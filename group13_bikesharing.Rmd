@@ -1,12 +1,14 @@
 ---
-title: "Bikesharing"
-output: html_document
+title: "Predicting the Number of Bike Shares"
+output:
+  html_document:
+    toc: true
+    theme: united
 ---
 
-# Predicting the Number of Bike Shares
 In this analysis we would like to predict the count of bike rentals in Washington DC with a regression analysis, Decision Trees, Support Vector Machines (SVMs) and Neural Networks (NN).
 
-## 0. Import Packages
+# 0. Import Packages
 Before the project starts, all required packages are imported.
 ```{r, message=FALSE}
 library(ggplot2)
@@ -27,17 +29,17 @@ library(gbm)
 set.seed(123)
 ```
 
-## 1. Getting Data
-### Data source
+# 1. Getting Data
+## Data source
 We downloaded the dataset "bikesharing.csv" from https://code.datasciencedojo.com/datasciencedojo/datasets/tree/master/Bike%20Sharing.
 
-### Loading the data
+## Loading the data
 In a first step the dataset is imported to R and stored in the data.frame *d.bike*:
 ```{r}
 d.bike <- read.csv("bikesharing.csv", header=TRUE)
 ```
 
-### Describing the dataset
+## Describing the dataset
 ```{r include=FALSE}
 str(d.bike)
 ```
@@ -66,7 +68,7 @@ The dataset contains hourly information about a day and its weather conditions i
 * *registered*: number of registered users (eg. workers that use bikes daily)
 * *cnt*: number of total rentals
 
-### Investigating the correlation between all predictors
+## Investigating the correlation between all predictors
 In order to make a valid feature selection in the next step, we now want to investigate the correlation between the predictors. The so-called corrplot offers a simple and clear display. This shows a correlation matrix. Correlations are represented by dots. The exact value can be read off the scale.
 ```{r}
 predictors = c("dteday", "season", "yr","mnth","hr","holiday","weekday",
@@ -76,7 +78,7 @@ corrplot(cor(data.matrix(d.bike[predictors])))
 
 As the corrplot shows, dteday correlates strongly with the predictor yr. Furthermore it can be seen that there is a correlation between dteday and season as well as mnth. There is also a relatively strong correlation between month and season.The strongest correlation of almost 1 shows temp and atemp.
 
-### Feature Selection
+## Feature Selection
 We decide to delete the feature *instant* and *dteday*. *instant* is a record index that has been artificially created. Therefore it will have no relevant effect on *cnt*. *dteday* is the date of the record. It correlates with the three other attributes *season*, *yr* and *mnth*. The features season and mnth as well as temp and atem will be kept for now.
 
 ```{r}
@@ -94,7 +96,7 @@ d.bike$workingday <- as.factor(d.bike$workingday)
 d.bike$weathersit <- as.factor(d.bike$weathersit)
 ```
 
-### Checking the data
+## Checking the data
 ```{r}
 head(d.bike)
 tail(d.bike)
@@ -108,7 +110,7 @@ mean(is.na(d.bike))
 
 The record contains no rows with missing data.
 
-### Creating training and test data set
+## Creating training and test data set
 At this point the data set d.bike is divided into training and test set. The training set should consist of 75% of the data and the test set of 25% of the data.
 ```{r}
 d.bike.train.id <- sample(seq_len(nrow(d.bike)),size = floor(0.75*nrow(d.bike)))
@@ -116,12 +118,12 @@ d.bike.train <- d.bike[d.bike.train.id,]
 d.bike.test <- d.bike[-d.bike.train.id,]
 ```
 
-## 2. Explorative Data Analysis
+# 2. Explorative Data Analysis
 In this section each attribute is considered to make certain assumptions. Different statistical diagrams are used for this purpose. The effects of the different attributes on cnt are tested using ANOVA for categorical attributes and a linear regression model for numerical values. The aim of this explorative data analysis is to get a starting point for the model building.
 
 To keep our documentation clear, not all graphical analyses are shown. For example, interactions between predictors are not shown in this document but only described. At these points, references are made to the R-file.
 
-### Count
+## Count
 In the very first step we would like to look at the distribution of the response variable count. For this purpose we create a histogram.
 ```{r}
 ggplot(data = d.bike, aes(x=cnt)) +
@@ -158,7 +160,7 @@ sorted.means <- sort(t.mean)
 quantile(sorted.means, probs = c(0.025, 0.975))
 ```
 
-### Season
+## Season
 If we want to visualize the effect of the *season* as a categorical variable on the number of bike rentals it is a good idea to use a box plot.
 ```{r}
 ggplot(data = d.bike, aes(group=season, y = cnt, x = as.factor(season))) +
@@ -177,7 +179,7 @@ anova(lm.season.0, lm.season.1)
 
 As we can see from the p-value there is strong evidence that at least one level in *season* has a strong effect on the number of bike rentals. The lower value of the residual sums of squares in lm.season.1 also indicates that the more complex model has smaller residuals than the less complex model lm.season.0.
 
-### Year
+## Year
 Since we also consider year to be a categorical variable, a box plot is again a good choice. For all categorical variables we will use a boxplot for the graphical representation in the following.
 
 ```{r}
@@ -195,7 +197,7 @@ anova(lm.year.0, lm.year.1)
 
 The p-value shows strong evidence that one of the two years 2010 and 2011 have a significant effect on cnt. Furthermore, the RSS shows that the more complex model lm.year.1 has significantly smaller residuals than the simpler one.
 
-### Month
+## Month
 ```{r}
 ggplot(data = d.bike, aes(group=mnth, y = cnt, x = as.factor(mnth))) +
   geom_boxplot() + scale_x_discrete(limits=seq(1,12)) + xlab("Month") + ylab("Count")
@@ -212,7 +214,7 @@ anova(lm.month.0, lm.month.1)
 As the p-value shows, there is strong evidence that at least one month must have a significant effect on cnt. Also the RSS shows little surprising. The more complex model lm.month.1 seems to represent the data better than the model lm.month.0.
 
 
-### Hour
+## Hour
 ```{r}
 ggplot(data = d.bike, aes(group=hr, y = cnt, x = as.factor(hr))) +
   geom_boxplot() + scale_x_discrete(limits=seq(1,23)) + xlab("Hour") + ylab("Count")
@@ -228,7 +230,7 @@ anova(lm.hr.0, lm.hr.1)
 
 The p-value also reflects this. At least one time of day has a significant effect on cnt. The RSS differs here extremely strongly between complex and simple models. The time of day will probably play a role in the final regression model.
 
-### Holiday
+## Holiday
 ```{r}
 ggplot(data = d.bike, aes(group=holiday, y = cnt, x = as.factor(holiday))) +
   geom_boxplot() + xlab("Holiday") + ylab("Count")
@@ -244,7 +246,7 @@ anova(lm.holiday.0, lm.holiday.1)
 
 The p-value shows strong evidence that no holiday and/or holiday has a significant effect on cnt. However, if we look at RSS at this point, which differs only minimally between simple and complex model, holiday could be a feature that will be not included in the model.
 
-### Weekday
+## Weekday
 ```{r}
 ggplot(data = d.bike, aes(group=weekday, y= cnt, x = as.factor(weekday))) +
   geom_boxplot() + xlab("Weekday") + ylab("Count")
@@ -260,7 +262,7 @@ anova(lm.weekday.0, lm.weekday.1)
 
 As the p-value shows, there is only medium evidence that at least one weekday has a significant effect on cnt. Also the RSS does not differ too much between simple and complex model. This leads to the conclusion that probably the weekday is not included in the final model.
 
-### Working day
+## Working day
 ```{r}
 ggplot(data = d.bike, aes(group=workingday, y = cnt, x = as.factor(workingday))) +
   geom_boxplot() + xlab("Working day") + ylab("Count")
@@ -276,7 +278,7 @@ anova(lm.workingday.0, lm.workingday.1)
 
 As the p-value shows, there is strong evidence that the no working day and/or working day has a significant effect on cnt. Again, the RSS does not differ very much. Working day possibly brings no benefit in the model and will probably be omitted.
 
-### Weather Situation
+## Weather Situation
 ```{r}
 ggplot(data = d.bike, aes(group=weathersit, y = cnt, x = as.factor(weathersit))) +
   geom_boxplot()  + xlab("Weather Situation") + ylab("Count")
@@ -292,7 +294,7 @@ anova(lm.weathersit.0, lm.weathersit.1)
 
 There is strong evidence that at least one weather situation has a significant effect on cnt. The RSS differs greatly between the two models. This will probably be a feature that makes it into the final model.
 
-### Temperature
+## Temperature
 
 ```{r}
 ggplot(data = d.bike, mapping = aes(y = cnt, x = temp)) +
@@ -309,7 +311,7 @@ summary(gam.temp.1)
 
 First, a relatively high estimated degree of freedom (edf) of 8,747 is striking. This indicates the high complexity of the relationship. The p-value shows strong evidence that the slope is not 0 and thus there is a correlation between temp and cnt. The adjusted R-Squared shows that 17 percent of the variability is explained by the data. Thus temp could play a role in the final model. temp shows interaction effects with all of the categorical variables except the yr (see line 142, group13_bikesharing.R).
 
-### Feeling Temperature
+## Feeling Temperature
 
 ```{r}
 ggplot(data = d.bike, mapping = aes(y = cnt, x = atemp)) +
@@ -325,7 +327,7 @@ summary(gam.atemp.1)
 
 The edf again shows a more complex relationship between atemp and cnt. The p-value shows strong evidence that the slope is not 0. The R-Squared shows that the model explains 17% of the data. Therefore, atemp could also play a role in the final model. atemp shows interaction effects with all of the categorical variables except the yr (see line 160, group13_bikesharing.R).
 
-### Humidity
+## Humidity
 
 ```{r}
 ggplot(data = d.bike, mapping = aes(y = cnt, x = hum)) +
@@ -341,7 +343,7 @@ summary(gam.hum.1)
 
 As the hypothesis test shows, there is strong evidence that hum has an effect on cnt. Furthermore, the R-Squared shows that the model explains 11% of the data. Thus, hum could also be relevant for the final model. hum shows interaction effects with all of the categorical variables (see line 178, group13_bikesharing.R).
 
-### Windspeed
+## Windspeed
 
 ```{r}
 ggplot(data = d.bike, mapping = aes(y = cnt, x = windspeed)) +
@@ -357,7 +359,7 @@ summary(lm.windspeed.1)
 
 The wind speed has a positive effect on cnt. This is surprising, since the observed data seems to decrease with increasing wind speed. As R-Squared shows, this regression model explains only 0.8% of the data. This indicates that the attribute can be omitted in the final model.
 
-### Casual Users and registered users
+## Casual Users and registered users
 
 ```{r}
 ggplot(data = d.bike, mapping = aes(y = cnt, x = casual)) +
@@ -381,7 +383,7 @@ summary(lm.registered.1)
 
 Both casual and registered users show a positive effect and explain a large part of the data with the model. This suggests that casual and registered users need not be considered separately. Furthermore, casual and registered users are not further distinguished and are therefore not considered in the model.
 
-### Model development
+## Model development
 
 In this section, the insights gained from the exploratory data analysis and the consideration of the individual attributes should help to form a hypothesis about what the final model might look like. This hypothesis is the starting point for developing the model.
 
@@ -448,7 +450,7 @@ The predictors temp, atemp and hum show polynomial effects.
 final.model.1 <- cnt ~ as.factor(season) + as.factor(yr) + as.factor(mnth) + as.factor(hr) + as.factor(weathersit) + poly(hum, degree = 8.7) + poly(temp, degree = 8) + poly(atemp, degree = 8.9) + atemp:season + hum:season + hum:yr + atemp:mnth + temp:hr + hum:hr
 ```
 
-### Cross Validation
+## Cross Validation
 In this section, the result from the section "Model development" shall be validated by cross-validation. For this purpose, all models that played a role in the development of a final model are compared with each other. The mean R-squared of the individual models, which is calculated from 10-fold cross-validation, serves as a comparison value.
 
 ```{r, warning = FALSE}
@@ -511,31 +513,31 @@ mean(r.squared.final.model)
 
 As the comparison shows, the full.model.1 according to R-Squared is the best model. However, since the final model is the second best and much less complex than the full model, the result of the model development can be validated. For further analysis steps final.model.1 is used.
 
-## 3. Regression Analysis
+# 3. Regression Analysis
 In this chapter the bike rental cnt will be predicted respectively estimated using a linear, a non-linear and a poisson regressive model. The three models will then be compared using a 10-fold cross-validation based on the R-Squared. 
 
-### Linear Regression
+## Linear Regression
 ```{r}
 lm.bike.1 <- lm(final.model.1, data = d.bike)
 summary(lm.bike.1)
 ```
 The linear regression model explains about 74.5 of the variability of the data. This value has already been calculated in the section "Model development".
 
-### Non-linear Regression
+## Non-linear Regression
 ```{r}
 gam.bike.1 <- gam(cnt ~ as.factor(season) + as.factor(yr) + as.factor(mnth) + as.factor(hr) + as.factor(weathersit) + s(hum) + s(temp) + s(atemp) + atemp:season + hum:season + hum:yr + atemp:mnth + temp:hr + hum:hr, data = d.bike)
 summary(gam.bike.1)
 ```
 The non-linear regression model shows the same result as the linear regression model. The variability of the data is explained by 74.5%.
 
-### Poisson Regression
+## Poisson Regression
 
 ```{r}
 poi.bike.1 <- glm(final.model.1, data = d.bike)
 summary(poi.bike.1)
 ```
 
-### Comparing the models
+## Comparing the models
 To enable a meaningful comparison between the three models, the models should train 10 times with the training set and then predict the new data. Finally, the corresponding R-Squared of all three models is compared to each other to make a statement about the best model.
 ```{r, warning = FALSE}
 for(i in 1:10){
@@ -571,10 +573,10 @@ The result is quite close. But the best result is achieved by the poisson regres
 ```{r include=FALSE}
 d.bike.new <- subset(d.bike, select=-c(holiday, weekday, workingday, windspeed, casual, registered))
 ```
-## 4. Trees
+# 4. Trees
 In this chapter a classification tree and a regression tree are used to predict cnt.  Once as class and once as discrete value. Afterwards, the regression tree model is used to analyse the bagging, random forests and boosting procedures.
 
-### Classification Tree
+## Classification Tree
 To be able to predict a class using the classification tree, a class must first be created. For this purpose five classes are formed first. The classes indicate whether few (0) or many (5) bicycles were rented at the observed hour. The classes are formed according to a simple principle. The maximum observed value of cnt is divided by 5. Thus five equally large intervals are formed. Finally, the training and test data set is initialized with the classified data.
 
 ```{r}
@@ -689,7 +691,7 @@ tree.classification.bike.pred.test.error
 
 The table as well as the error and hit rates show that even the trimmed tree still makes errors in the classification. The improvement is - as can be seen from the lower two values - minimal.
 
-### Regression Tree
+## Regression Tree
 Count values are not bell-shaped distributed
 ```{r}
 hist(d.bike.train.new$cnt)
@@ -697,7 +699,7 @@ hist(d.bike.train.new$cnt)
 
 Only the variables "hr", "yr" and "season" are used to construct the tree. There are only 11 nodes
 
-### Bagging
+## Bagging
 In this section, the bagging shall be performed on the regression tree model to reduce the variance. As y-variable not the class is used but cnt. The number of Bootstrap replication is set to 25. It should no cross validation be used as set with parameter coob.
 
 ```{r}
@@ -723,10 +725,10 @@ mean((yhat.bag-d.bike.test.new$cnt)^2)
 
 The calculation of the MSE from the forecast confirms this a second time.
 
-### Random Forest
+## Random Forest
 At this time Random Forest could not be executed for unknown reasons. The process kept getting hung up.
 
-### Boosting
+## Boosting
 In this section Boosting will be used to improve the model. Since our data set is count data, we choose the Poisson distribution. The number of trees to be generated in boosting is set to 1000.
 ```{r}
 boost.bike=gbm(cnt~.-class,data=d.bike.train.new,
@@ -752,10 +754,10 @@ mean((yhat.boost -d.bike.test.new$cnt)^2)
 
 The MSE is very high at 66442. About thirty times as high as in the example of bagging (see Bagging). Adjustments to the shrinkage parameter have no great effect (see line 668, group13_bikesharing.R).
 
-## 5. Support Vector Machines
+# 5. Support Vector Machines
 The fifth chapter deals with the classification of data using Support Vector Machines (SVM). Two SVMs are trained and tested. In the first case, the data is classified into two classes using SVM with two predictors. In the second case, the data is classified in five classes using the final model.
 
-### 2-class linear SVM with casual und atemp
+## 2-class linear SVM with casual und atemp
 An interesting classification is the division of the data in cyclists without subscription (casual) into those who ride during cool temperatures and those who ride during very warm temperatures. The two attributes casual and breath are considered. In a plot, a quite centered seperating hyperplane is supposed to divide the data into two classes. For this purpose an intercept of the x-value atemp of 0.5525 is defined straight-forward, which separates the two types of cyclist visually.
 
 ```{r}
@@ -831,7 +833,7 @@ table(predict = predict(svm.bike.1.best, c.bike),
 
 As the table shows, no errors are made in the prediction and the data is correctly classified.
 
-### 5-class linear SVM with the developed model
+## 5-class linear SVM with the developed model
 In the second section of this chapter, a classification into five classes based on the final.model.1 will be made. The same classes are used that were already generated in the "Classification Tree" section. Due to the multi-dimensionality (more than 3 predictors), the SVM classification cannot be visualized.
 
 To be able to fit an SVM model, the two data sets must be transformed.The class is removed from the x-variables and assigned as factor to the y-variable, i.e. the target variable.
@@ -919,4 +921,4 @@ errors=sum(predict.svm.bike.2.best.test!=d.bike.test.svm$y)
 
 The same result is shown on the test data set. The data is correctly classified using a new data set. An SVM can make good predictions for the two classification problems presented and the selected data set.
 
-## 6. Neural Networks
+# 6. Neural Networks
