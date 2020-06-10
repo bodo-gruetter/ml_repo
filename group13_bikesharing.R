@@ -15,6 +15,7 @@ library(corrplot)
 #install.packages("tree")
 library(tree)
 library(mgcv)
+library(tidyverse)
 library(boot)
 
 ########## Prepare Environment ##########
@@ -470,25 +471,24 @@ str(d.bike.test.new)
 # let's predict the categorical variable "cnt" (--> factor)
 table(d.bike.train.new$cnt) #Categorical variable --> classification tree
 #train data comes in
-tree.classification.bike <- tree(cnt ~ .-class, data = d.bike.train.new, subset=train) 
+tree.regression.bike <- tree(cnt ~ .-class, data = d.bike.train.new) 
 
-summary(tree.classification.bike)
+summary(tree.regression.bike)
 # Output:
 #   - There are 11 terminal nodes (leaves) of the tree.
 #   - Here "residual mean deviance" is just mean squared error: we have an RMS error of 0.66 and an misclassification rate of 15%.
 
-plot(tree.classification.bike)
-text(tree.classification.bike, pretty=1, cex=0.75)
+plot(tree.regression.bike)
+text(tree.regression.bike, pretty=1, cex=0.75)
 
-#let's do some predictions, on the data already used for the training --> training error
-tree.classification.bike <- tree(as.factor(cnt) ~ .-class, data = d.bike.train.new, subset=train) 
-tree.classification.bike.pred <- predict(tree.classification.bike, d.bike.train.new, type="class")
+##let's do some predictions, on the data already used for the training --> training error
+#tree.classification.bike <- tree(as.factor(cnt) ~ .-class, data = d.bike.train.new) 
+#tree.classification.bike.pred <- predict(tree.classification.bike, d.bike.train.new, type="class")
 
 ########################## Regression tree analysis starts #############
 #classification did not work because at most 32 levels are possible. cnt has more than 1000 levels
 #instead regression tree is to be used
-tree.classification.bike <- tree(cnt ~ .-class, data = d.bike.train.new, subset=train) 
-tree.regression.bike.pred <- predict(tree.classification.bike, d.bike.train.new, type="vector")
+tree.regression.bike.pred <- predict(tree.regression.bike, d.bike.train.new, type="vector")
 
 # compare predictions of regression tree with true values (visually)
 plot(tree.regression.bike.pred,d.bike.train.new$cnt)
@@ -502,7 +502,7 @@ abline(0 ,0, lwd=5,lty="dotted")
 abline(1.66 ,0, lwd=2, col="red", lty="dotted")
 abline(-1.66 ,0, lwd=2, col="red", lty="dotted")
 
-library(tidyverse)
+
 error_dataframe <- tibble(element_ID,error)
 ggplot(data=error_dataframe) + geom_boxplot(aes(y=error))
 hist(error)
@@ -526,17 +526,12 @@ total <- nrow(d.bike.train.new)
 train <- sample(1:total, as.integer(total * ratio))
 
 
-tree.regression.bike.2 <- tree(cnt ~ .-class, data = d.bike.train.new, subset=train)
-plot(tree.regression.bike.2)
-text(tree.regression.bike.2, pretty=1, cex=0.75)
-partition.tree(tree.regression.bike.2)
-
-tree.regression.bike.2.pred <- predict(tree.regression.bike.2, d.bike.test.new, type="vector")
+tree.regression.bike.2.pred <- predict(tree.regression.bike, d.bike.test.new, type="vector")
 # --> for documentation, use the predict.tree help (from the tree package) --> help(predict.tree)
 
 #let's check the cumulated squared error --> RSS
-(RSS.2.in <- mean(((d.bike.train.new[7]-predict(tree.regression.bike.2, d.bike.train.new, type="vector"))^2)$cnt))
-(RSS.2 <- mean(((d.bike.test.new[7]-tree.regression.bike.2.pred)^2)$cnt))
+(RSS.2.in <- mean(((d.bike.train.new["cnt"]-predict(tree.regression.bike, d.bike.train.new, type="vector"))^2)$cnt))
+(RSS.2 <- mean(((d.bike.test.new["cnt"]-tree.regression.bike.2.pred)^2)$cnt))
 
 errors.2.in <- predict(tree.regression.bike.2, d.bike.train.new, type="vector")-d.bike.train.new$cnt
 #element.2.in <- 1:length(errors.2.in)
