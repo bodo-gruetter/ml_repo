@@ -990,6 +990,6 @@ regression.tree.rmse
 bagging.rmse
 randomforest.rmse
 boosting.rmse
-neuralnetwork.rmse
+neuralnetwork.accuracy
 classification.tree.accuracy
 svm.accuracy
