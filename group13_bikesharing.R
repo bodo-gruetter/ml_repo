@@ -922,19 +922,22 @@ for(i in 1:10){
   d.bike.test.new <- d.bike.new[-d.bike.train.id,]
   
   #Linear Regression
+  lm.bike.1.train <- lm(final.model.1, data = d.bike.train.new)
   predicted.lm.bike.1.test <- predict(lm.bike.1.train,
                                       newdata = d.bike.test.new)
-  r.squared.lm.bike.1 <- cor(predicted.lm.bike.1.test, d.bike.test.new$cnt)^2
+  lm.bike.1.rmse <- sqrt(mean(lm.bike.1.train$residuals^2))
   
   #Non-linear Regression
+  gam.bike.1.train <- gam(cnt ~ as.factor(season) + as.factor(yr) + as.factor(mnth) + as.factor(hr) + as.factor(weathersit) + s(hum) + s(temp) + s(atemp) + atemp:season + hum:season + hum:yr + atemp:mnth + temp:hr + hum:hr, data = d.bike.train.new)
   predicted.gam.bike.1.test <- predict(gam.bike.1.train,
                                        newdata = d.bike.test.new)
-  r.squared.gam.bike.1 <- cor(predicted.gam.bike.1.test, d.bike.test.new$cnt)^2
+  gam.bike.1.rmse <- sqrt(mean(gam.bike.1.train$residuals^2))
   
   #Poisson Regression
+  poi.bike.1.train <- glm(final.model.1, data = d.bike.new)
   predicted.poi.bike.1.test <- predict(poi.bike.1.train,
                                        newdata = d.bike.test.new)
-  r.squared.poi.bike.1 <- cor(predicted.poi.bike.1.test, d.bike.test.new$cnt)^2
+  poi.bike.1.rmse <- sqrt(mean(poi.bike.1.train$residuals^2))
   
   #Regression Tree
   tree.regression.bike.pruned.test.pred <- predict(tree.regression.bike.pruned, d.bike.test.new, type="vector")
@@ -970,9 +973,9 @@ for(i in 1:10){
 }
 
 #RMSE for Regression cases
-lm.bike.1.rmse <- sqrt(mean(lm.bike.1$residuals^2))
-gam.bike.1.rmse <- sqrt(mean(gam.bike.1$residuals^2))
-poi.bike.1.rmse <- sqrt(mean(poi.bike.1$residuals^2))
+lm.bike.1.rmse <- mean(lm.bike.1.rmse)
+gam.bike.1.rmse <- mean(gam.bike.1.rmse)
+poi.bike.1.rmse <- mean(poi.bike.1.rmse)
 regression.tree.rmse <- mean(RMSE.pruned.test)
 bagging.rmse <- mean(RMSE.bag)
 randomforest.rmse <- mean(RMSE.rf)

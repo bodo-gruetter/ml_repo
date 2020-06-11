@@ -2610,14 +2610,14 @@ h2o.init()</code></pre>
 <pre><code>##  Connection successful!
 ## 
 ## R is connected to the H2O cluster: 
-##     H2O cluster uptime:         1 hours 45 minutes 
+##     H2O cluster uptime:         4 hours 30 minutes 
 ##     H2O cluster timezone:       Europe/Berlin 
 ##     H2O data parsing timezone:  UTC 
 ##     H2O cluster version:        3.30.0.1 
 ##     H2O cluster version age:    2 months and 7 days  
 ##     H2O cluster name:           H2O_started_from_R_gruet_jwf289 
 ##     H2O cluster total nodes:    1 
-##     H2O cluster total memory:   0.68 GB 
+##     H2O cluster total memory:   0.53 GB 
 ##     H2O cluster total cores:    8 
 ##     H2O cluster allowed cores:  8 
 ##     H2O cluster healthy:        TRUE 
@@ -2640,9 +2640,15 @@ model_dl &lt;- h2o.deeplearning(y = 4, training_frame = train_hf, nfolds = 10, s
   |                                                                            
   |                                                                      |   0%
   |                                                                            
-  |====================                                                  |  29%
+  |====                                                                  |   6%
   |                                                                            
-  |================================                                      |  46%
+  |==============                                                        |  20%
+  |                                                                            
+  |===========================                                           |  39%
+  |                                                                            
+  |=================================                                     |  47%
+  |                                                                            
+  |===============================================                       |  67%
   |                                                                            
   |======================================================                |  77%
   |                                                                            
@@ -2652,11 +2658,13 @@ model_dl &lt;- h2o.deeplearning(y = 4, training_frame = train_hf, nfolds = 10, s
   |                                                                            
   |==========================================================            |  83%
   |                                                                            
-  |============================================================          |  86%
+  |=============================================================         |  88%
   |                                                                            
-  |==================================================================    |  94%
+  |=================================================================     |  93%
   |                                                                            
-  |===================================================================== |  98%
+  |==================================================================    |  95%
+  |                                                                            
+  |===================================================================== |  99%
   |                                                                            
   |======================================================================| 100%</code></pre>
 <pre class="r"><code># prediction on TRAIN
@@ -2671,7 +2679,7 @@ predicted_h20_deep_neural_network_class_train &lt;- as.data.frame(predicted_h20_
 #table(training$cnt, predicted_h20_deep_neural_network_class_train[,1])
 predicted_h20_deep_neural_network_performance_train &lt;- mean(predicted_h20_deep_neural_network_class_train[,1] == training$cnt)*100
 print(paste(&#39;training accuracy: &#39;,predicted_h20_deep_neural_network_performance_train,&quot;%&quot;))</code></pre>
-<pre><code>## [1] &quot;training accuracy:  1.00506367960718 %&quot;</code></pre>
+<pre><code>## [1] &quot;training accuracy:  0.997391437778119 %&quot;</code></pre>
 <pre class="r"><code># prediction on TEST
 test_hf &lt;- as.h2o(test)</code></pre>
 <pre><code>## 
@@ -2690,7 +2698,7 @@ predicted_h20_deep_neural_network_class_test &lt;- as.data.frame(predicted_h20_d
 #table(test$cnt, as.integer(predicted_h20_deep_neural_network_class_test[,1]))
 predicted_h20_deep_neural_network_performance_test &lt;- mean(predicted_h20_deep_neural_network_class_test[,1] == test$cnt)*100
 print(paste(&#39;test accuracy: &#39;,predicted_h20_deep_neural_network_performance_test,&quot;%&quot;))</code></pre>
-<pre><code>## [1] &quot;test accuracy:  1.21979286536249 %&quot;</code></pre>
+<pre><code>## [1] &quot;test accuracy:  1.35788262370541 %&quot;</code></pre>
 <pre class="r"><code>set.seed(400)
 (ref_test=sample(1:dim(test)[1], 10, replace=F))</code></pre>
 <pre><code>##  [1] 1637 3958 3580 1756  156 1550 2573 3625  941 2815</code></pre>
@@ -2742,19 +2750,22 @@ print(paste(&#39;test accuracy: &#39;,predicted_h20_deep_neural_network_performa
   d.bike.test.new &lt;- d.bike.new[-d.bike.train.id,]
   
   #Linear Regression
+  lm.bike.1.train &lt;- lm(final.model.1, data = d.bike.train.new)
   predicted.lm.bike.1.test &lt;- predict(lm.bike.1.train,
                                       newdata = d.bike.test.new)
-  r.squared.lm.bike.1 &lt;- cor(predicted.lm.bike.1.test, d.bike.test.new$cnt)^2
+  lm.bike.1.rmse &lt;- sqrt(mean(lm.bike.1.train$residuals^2))
   
   #Non-linear Regression
+  gam.bike.1.train &lt;- gam(cnt ~ as.factor(season) + as.factor(yr) + as.factor(mnth) + as.factor(hr) + as.factor(weathersit) + s(hum) + s(temp) + s(atemp) + atemp:season + hum:season + hum:yr + atemp:mnth + temp:hr + hum:hr, data = d.bike.train.new)
   predicted.gam.bike.1.test &lt;- predict(gam.bike.1.train,
                                        newdata = d.bike.test.new)
-  r.squared.gam.bike.1 &lt;- cor(predicted.gam.bike.1.test, d.bike.test.new$cnt)^2
+  gam.bike.1.rmse &lt;- sqrt(mean(gam.bike.1.train$residuals^2))
   
   #Poisson Regression
+  poi.bike.1.train &lt;- glm(final.model.1, data = d.bike.new)
   predicted.poi.bike.1.test &lt;- predict(poi.bike.1.train,
                                        newdata = d.bike.test.new)
-  r.squared.poi.bike.1 &lt;- cor(predicted.poi.bike.1.test, d.bike.test.new$cnt)^2
+  poi.bike.1.rmse &lt;- sqrt(mean(poi.bike.1.train$residuals^2))
   
   #Regression Tree
   tree.regression.bike.pruned.test.pred &lt;- predict(tree.regression.bike.pruned, d.bike.test.new, type=&quot;vector&quot;)
@@ -2772,7 +2783,7 @@ print(paste(&#39;test accuracy: &#39;,predicted_h20_deep_neural_network_performa
   #Boosting
   yhat.boost=predict(boost.bike,newdata=d.bike.test.new, n.trees=1000)
   RMSE.boost &lt;- sqrt(mean((yhat.boost -d.bike.test.new$cnt)^2))
-
+  
   #Neural Network
   predicted_h20_deep_neural_network_probabilites_test &lt;- h2o.predict(model_dl, test_hf)
   predicted_h20_deep_neural_network_performance_test &lt;- mean(predicted_h20_deep_neural_network_class_test[,1] == test$cnt)*100
@@ -2839,9 +2850,9 @@ print(paste(&#39;test accuracy: &#39;,predicted_h20_deep_neural_network_performa
   |                                                                            
   |======================================================================| 100%</code></pre>
 <pre class="r"><code>#RMSE for Regression cases
-lm.bike.1.rmse &lt;- sqrt(mean(lm.bike.1$residuals^2))
-gam.bike.1.rmse &lt;- sqrt(mean(gam.bike.1$residuals^2))
-poi.bike.1.rmse &lt;- sqrt(mean(poi.bike.1$residuals^2))
+lm.bike.1.rmse &lt;- mean(lm.bike.1.rmse)
+gam.bike.1.rmse &lt;- mean(gam.bike.1.rmse)
+poi.bike.1.rmse &lt;- mean(poi.bike.1.rmse)
 regression.tree.rmse &lt;- mean(RMSE.pruned.test)
 bagging.rmse &lt;- mean(RMSE.bag)
 randomforest.rmse &lt;- mean(RMSE.rf)
@@ -2853,9 +2864,9 @@ svm.accuracy &lt;- mean(performance_test)
 
 #Output
 lm.bike.1.rmse</code></pre>
-<pre><code>## [1] 91.21894</code></pre>
+<pre><code>## [1] 90.71544</code></pre>
 <pre class="r"><code>gam.bike.1.rmse</code></pre>
-<pre><code>## [1] 91.17963</code></pre>
+<pre><code>## [1] 90.66783</code></pre>
 <pre class="r"><code>poi.bike.1.rmse</code></pre>
 <pre><code>## [1] 91.21894</code></pre>
 <pre class="r"><code>regression.tree.rmse</code></pre>
@@ -2867,13 +2878,13 @@ lm.bike.1.rmse</code></pre>
 <pre class="r"><code>boosting.rmse</code></pre>
 <pre><code>## [1] 258.8552</code></pre>
 <pre class="r"><code>neuralnetwork.accuracy</code></pre>
-<pre><code>## [1] 0.01219793</code></pre>
+<pre><code>## [1] 0.01357883</code></pre>
 <pre class="r"><code>classification.tree.accuracy</code></pre>
 <pre><code>## [1] 0.7132336</code></pre>
 <pre class="r"><code>svm.accuracy</code></pre>
 <pre><code>## [1] 0.9997699</code></pre>
 <p>Let us first compare only the regression models. These include: the linear regression model, the non-linear regression model, the possion regression model, the regression tree, bagging, random forest and boosting.</p>
-<p>Random Forest has by far the lowest value. The forecast therefore fits the data very well. However, the value must be viewed critically. The random forest was carried out with class as the y-variable, while in the other models cnt was predicted. If we look at the other models, we see that bagging with cnt as the target variable performed best. The second best models are the Poisson and the linear regression model, which perform slightly better than the non-linear model. Far behind, however, are the regression tree and boosting.</p>
+<p>Random Forest has by far the lowest value. The forecast therefore fits the data very well. However, the value must be viewed critically. The random forest was carried out with class as the y-variable, while in the other models cnt was predicted. If we look at the other models, we see that bagging with cnt as the target variable performed best. The second best models are the non-linear and the linear regression models, which perform slightly better than the poisson model. Far behind, however, are the regression tree and boosting.</p>
 <p>As the accuracy values of the classification models, i.e. the Neural Network, the Classification Tree and the SVM, show, the SVM with an accuracy of almost 100% is the best model in our analysis. The Classification Tree still classifies with an accuracy of about 70% while the Neural Network is far behind.</p>
 <p>In conclusion, it can be said that several models are suitable for predicting bicycle rentals - either as a numerical value as in the regression models, or as a class as in the classification. The best ones include SVM, bagging, random forest and linear or non-linear regression models.</p>
 </div>
