@@ -1236,7 +1236,7 @@ bagging.rmse <- mean(RMSE.bag)
 randomforest.rmse <- mean(RMSE.rf)
 boosting.rmse <- mean(RMSE.boost)
 #Accuracy for Classification
-neuralnetwork.rmse <- mean(predicted_h20_deep_neural_network_performance_test)/100
+neuralnetwork.accuracy <- mean(predicted_h20_deep_neural_network_performance_test)/100
 classification.tree.accuracy <- mean(prune.tree.classification.bike.pred.test.correct)
 svm.accuracy <- mean(performance_test)
 
