@@ -946,13 +946,16 @@ for(i in 1:10){
   RMSE.bag <- sqrt(mean((yhat.bag-d.bike.test.new$cnt)^2))
   
   #Random Forest
+  yhat.rf = predict(rf.bike ,newdata=d.bike.test.new)
+  RMSE.rf <- sqrt(mean((yhat.rf-d.bike.test.new$class)^2))
   
   #Boosting
   yhat.boost=predict(boost.bike,newdata=d.bike.test.new, n.trees=1000)
   RMSE.boost <- sqrt(mean((yhat.boost -d.bike.test.new$cnt)^2))
-
-  #Neural Network
   
+  #Neural Network
+  predicted_h20_deep_neural_network_probabilites_test <- h2o.predict(model_dl, test_hf)
+  predicted_h20_deep_neural_network_performance_test <- mean(predicted_h20_deep_neural_network_class_test[,1] == test$cnt)*100
   
   #Classification Tree
   prune.tree.classification.bike.pred.test <- predict(prune.tree.classification.bike,  d.bike.test.new, type="class")
@@ -972,10 +975,10 @@ gam.bike.1.rmse <- sqrt(mean(gam.bike.1$residuals^2))
 poi.bike.1.rmse <- sqrt(mean(poi.bike.1$residuals^2))
 regression.tree.rmse <- mean(RMSE.pruned.test)
 bagging.rmse <- mean(RMSE.bag)
-randomforest.rmse <- NA
+randomforest.rmse <- mean(RMSE.rf)
 boosting.rmse <- mean(RMSE.boost)
-neuralnetwork.rmse <- NA
 #Accuracy for Classification
+neuralnetwork.rmse <- mean(predicted_h20_deep_neural_network_performance_test)/100
 classification.tree.accuracy <- mean(prune.tree.classification.bike.pred.test.correct)
 svm.accuracy <- mean(performance_test)
 
